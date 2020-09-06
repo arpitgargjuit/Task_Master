@@ -1,5 +1,6 @@
 package com.cbitts.taskmanager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
 
     @Override
     public int getItemCount() {
+        Log.d("Size of",""+Title.size());
         return Title.size();
     }
 

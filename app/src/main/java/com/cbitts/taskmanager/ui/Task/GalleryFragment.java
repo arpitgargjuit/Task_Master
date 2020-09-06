@@ -72,9 +72,6 @@ public class GalleryFragment extends Fragment {
         super.onResume();
         Toast.makeText(getContext(), "tst resume", Toast.LENGTH_SHORT).show();
         getData();
-        recyclerView_adapter_tasks adapter = new recyclerView_adapter_tasks(Title,Description,Date,Priority);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
     }
 
@@ -85,7 +82,7 @@ public class GalleryFragment extends Fragment {
         Priority.clear();
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        firebaseFirestore.collection("tasks").document("pending").collection(firebaseAuth.getCurrentUser().getUid()).orderBy("due_date").whereEqualTo("priority","high").get()
+        firebaseFirestore.collection("tasks").document("pending").collection(firebaseAuth.getCurrentUser().getUid()).get()//.orderBy("due_date").whereEqualTo("priority","high").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -95,20 +92,23 @@ public class GalleryFragment extends Fragment {
                             Date.add(documentSnapshots.getString("due_date"));
                             Priority.add("High");
                         }
+                        recyclerView_adapter_tasks adapter = new recyclerView_adapter_tasks(Title,Description,Date,Priority);
+                        recyclerView.setAdapter(adapter);
+                        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                     }
                 });
-        firebaseFirestore.collection("tasks").document("pending").collection(firebaseAuth.getCurrentUser().getUid()).orderBy("due_date").whereEqualTo("priority","Normal").get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        for (QueryDocumentSnapshot documentSnapshots : queryDocumentSnapshots){
-                            Title.add(documentSnapshots.getString("title"));
-                            Description.add(documentSnapshots.getString("description"));
-                            Date.add(documentSnapshots.getString("due_date"));
-                            Priority.add("Normal");
-                        }
-                    }
-                });
+//        firebaseFirestore.collection("tasks").document("pending").collection(firebaseAuth.getCurrentUser().getUid()).orderBy("due_date").whereEqualTo("priority","Normal").get()
+//                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+//                        for (QueryDocumentSnapshot documentSnapshots : queryDocumentSnapshots){
+//                            Title.add(documentSnapshots.getString("title"));
+//                            Description.add(documentSnapshots.getString("description"));
+//                            Date.add(documentSnapshots.getString("due_date"));
+//                            Priority.add("Normal");
+//                        }
+//                    }
+//                });
 
     }
 }
