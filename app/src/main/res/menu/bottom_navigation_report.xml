@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <menu xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:showIn="navigation_view">
+
+        <group android:checkableBehavior="single">
+<!--        <item-->
+<!--            android:id="@+id/overdue"-->
+<!--            android:title="@string/report_navigation1"-->
+<!--            android:icon="@drawable/ic_menu_camera"/>-->
+        <item
+            android:id="@+id/pending"
+            android:title="@string/report_navigation2"
+            android:icon="@drawable/ic_menu_camera"/>
+        <item
+            android:id="@+id/complete"
+            android:title="@string/report_navigation3"
+            android:icon="@drawable/ic_menu_camera"/>
+        <item
+            android:id="@+id/waiting"
+            android:title="@string/report_navigation4"
+            android:icon="@drawable/ic_menu_camera"/>
+        </group>
+
+    </menu>
