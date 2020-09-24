@@ -30,6 +30,10 @@ public class MobileEnter extends AppCompatActivity {
                 if(TextUtils.isEmpty(MobileNumber)){
                     Toast.makeText(MobileEnter.this, "Enter the Mobile Number", Toast.LENGTH_SHORT).show();
                 }
+                else if (MobileNumber.length()!=10)
+                {
+                    mobileNumber.setError("Enter Correct Number");
+                }
                 else {
                     Intent intent = new Intent(MobileEnter.this,verify_otp.class);
                     intent.putExtra("Mobile",MobileNumber);

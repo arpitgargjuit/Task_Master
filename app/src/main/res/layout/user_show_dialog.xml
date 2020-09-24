@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="@android:color/transparent"
+    tools:context=".MainActivity">
+    <!--    android:weightSum="10">-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/white_box_round10"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Whom you want to allot"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_margin="10dp"
+            android:textColor="@color/colorPrimary"
+            android:layout_gravity="center_horizontal" />
+
+        <EditText
+            android:id="@+id/search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Search" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/person_list"
+            android:layout_width="match_parent"
+            android:layout_height="150dp" />
+        <!--        android:layout_weight="8"/>-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/confirm_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_corner_color1"
+                android:layout_margin="10dp"
+                android:textColor="#fff"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                android:text="Confirm" />
+
+            <Button
+                android:id="@+id/cancel_action"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#fff"
+                android:background="@drawable/round_corner_color1"
+                android:layout_margin="10dp"
+                android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                android:text="Cancel" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">Task Manager</string>
+    <string name="app_name">Task Master</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_title">Task Master</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
@@ -19,10 +19,11 @@
     <string name="report_navigation3">Completed</string>
     <string name="report_navigation4">Waiting</string>
 
-<!--    Add task-->
+    <!--    Add task-->
     <string name="tittle">Tittle of Task</string>
     <string name="description">Description</string>
-    
+    <string name="Loading">Loading...</string>
+
     <string-array name="priority_select">
         <item>Normal</item>
         <item>High</item>

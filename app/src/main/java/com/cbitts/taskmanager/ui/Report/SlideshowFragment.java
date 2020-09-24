@@ -41,7 +41,7 @@ public class SlideshowFragment extends Fragment {
         });
 
         navigationView.setOnNavigationItemSelectedListener(bottomNavigation);
-        getChildFragmentManager().beginTransaction().replace(R.id.report_container,new report_overdue()).commit();
+        getChildFragmentManager().beginTransaction().replace(R.id.report_container,new report_pending()).commit();
 
         return root;
     }

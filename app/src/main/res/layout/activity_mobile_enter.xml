@@ -8,29 +8,64 @@
     android:layout_gravity="center"
     tools:context=".MobileEnter">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Enter your mobile Number"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        />
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/logo_login"/>
+
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Enter your mobile Number"-->
+<!--        android:layout_marginStart="20dp"-->
+<!--        android:layout_marginEnd="20dp"-->
+<!--        />-->
+<!---->
+<!--    <com.google.android.material.textfield.TextInputLayout-->
+<!--        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_margin="20dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:hint="Enter Your Mobile Number"-->
+<!--        app:helperTextTextAppearance="@style/TextAppearance.AppCompat.Medium">-->
+<!--        <com.google.android.material.textfield.TextInputEditText-->
+<!--            android:id="@+id/mobile_number"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:inputType="phone" />-->
+<!--    </com.google.android.material.textfield.TextInputLayout>-->
+
     <EditText
         android:id="@+id/mobile_number"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="20dp"
-        android:inputType="number"
-        android:background="@drawable/layout_edit_text"/>
+        android:hint="Enter Your Phone Number"
+        android:inputType="number"/>
+<!--        android:background="@drawable/layout_edit_text"/>-->
+<!--    <Button-->
+<!--        android:id="@+id/next"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Get Otp"-->
+<!--        android:background="@drawable/layout_edit_text"-->
+<!--        android:layout_marginStart="20dp"-->
+<!--        android:paddingStart="20dp"-->
+<!--        android:paddingEnd="20dp"-->
+<!--        android:textColor="#fff"/>-->
     <Button
         android:id="@+id/next"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="@color/colorPrimary"
+        android:elevation="5dp"
         android:text="Get Otp"
-        android:background="@drawable/layout_edit_text"
-        android:layout_marginStart="20dp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:textColor="#fff"/>
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:transitionName="transition_next_btn" />
+<!--    android:onClick="callVerifyOTPScreen"-->
+
 
 </LinearLayout>

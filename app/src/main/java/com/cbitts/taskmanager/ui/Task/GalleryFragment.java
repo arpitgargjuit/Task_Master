@@ -4,37 +4,27 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.Spinner;
-import android.widget.Toast;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cbitts.taskmanager.R;
-import com.cbitts.taskmanager.recyclerView_adapter_tasks;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.ArrayList;
 
 public class GalleryFragment extends Fragment {
 
     private GalleryViewModel galleryViewModel;
     RecyclerView recyclerView;
-    ArrayList<String> Title = new ArrayList<>();
-    ArrayList<String> Description = new ArrayList<>();
-    ArrayList<String> Date = new ArrayList<>();
-    ArrayList<String> Priority = new ArrayList<>();
+    TextView loading;
+    Button all,sent,received;
+    int filter=0;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -45,12 +35,16 @@ public class GalleryFragment extends Fragment {
 
         final FloatingActionButton fab = root.findViewById(R.id.fab);
         recyclerView = root.findViewById(R.id.task_list);
+        loading = root.findViewById(R.id.loading_text);
+        all = root.findViewById(R.id.all);
+        sent = root.findViewById(R.id.sent);
+        received = root.findViewById(R.id.received);
 
 //        Black_layer= root.findViewById(R.id.taskList_fragment_black);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getChildFragmentManager().beginTransaction().replace(R.id.main_task,new add_task()).addToBackStack(null).commit();
+                getChildFragmentManager().beginTransaction()/*.replace(R.id.main_task,new add_task())*/.add(R.id.main_task,new add_task(),"addTask").addToBackStack(null).commit();
 //                fab.setVisibility(View.GONE);
 //                Black_layer.setVisibility(View.GONE);
             }
@@ -63,6 +57,39 @@ public class GalleryFragment extends Fragment {
             }
         });
 
+        all.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                all.setAlpha(1);
+                sent.setAlpha((float) 0.7);
+                received.setAlpha((float) 0.7);
+                filter = 0;
+                getData();
+            }
+        });
+
+        sent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                all.setAlpha((float) 0.7);
+                sent.setAlpha(1);
+                received.setAlpha((float) 0.7);
+                filter = 1;
+                getData();
+            }
+        });
+
+        received.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                all.setAlpha((float) 0.7);
+                sent.setAlpha((float) 0.7);
+                received.setAlpha(1);
+                filter = 2;
+                getData();
+            }
+        });
+
 
         return root;
     }
@@ -70,45 +97,16 @@ public class GalleryFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Toast.makeText(getContext(), "tst resume", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getContext(), "tst resume", Toast.LENGTH_SHORT).show();
         getData();
 
     }
 
     private void getData() {
-        Title.clear();
-        Description.clear();
-        Date.clear();
-        Priority.clear();
-        FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        firebaseFirestore.collection("tasks").document("pending").collection(firebaseAuth.getCurrentUser().getUid()).get()//.orderBy("due_date").whereEqualTo("priority","high").get()
-                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        for (QueryDocumentSnapshot documentSnapshots : queryDocumentSnapshots){
-                            Title.add(documentSnapshots.getString("title"));
-                            Description.add(documentSnapshots.getString("description"));
-                            Date.add(documentSnapshots.getString("due_date"));
-                            Priority.add("High");
-                        }
-                        recyclerView_adapter_tasks adapter = new recyclerView_adapter_tasks(Title,Description,Date,Priority);
-                        recyclerView.setAdapter(adapter);
-                        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                    }
-                });
-//        firebaseFirestore.collection("tasks").document("pending").collection(firebaseAuth.getCurrentUser().getUid()).orderBy("due_date").whereEqualTo("priority","Normal").get()
-//                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-//                    @Override
-//                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-//                        for (QueryDocumentSnapshot documentSnapshots : queryDocumentSnapshots){
-//                            Title.add(documentSnapshots.getString("title"));
-//                            Description.add(documentSnapshots.getString("description"));
-//                            Date.add(documentSnapshots.getString("due_date"));
-//                            Priority.add("Normal");
-//                        }
-//                    }
-//                });
+        Task_Adapter_dataSetter task_modelClass;
+        task_modelClass = new Task_Adapter_dataSetter(getContext(),recyclerView,this.getActivity(),loading,R.id.main_task, filter);
+        task_modelClass.getdata();
+
 
     }
 }

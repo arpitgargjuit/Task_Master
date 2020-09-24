@@ -3,7 +3,9 @@ package com.cbitts.taskmanager;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.chaos.view.PinView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -26,16 +29,23 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class verify_otp extends AppCompatActivity {
 
+    PinView editTextCode;
     FirebaseAuth mAuth;
     Button signIn;
-    EditText editTextCode;
+//    EditText editTextCode;
     private String mVerificationId;
     FirebaseFirestore firebaseFirestore;
+    String mobile;
     String TAG = "verify is this";
 
     @Override
@@ -45,10 +55,12 @@ public class verify_otp extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         signIn = findViewById(R.id.buttonSignIn);
         editTextCode = findViewById(R.id.editTextCode);
+//        pinView = findViewById(R.id.pin_view);
+//        pinView.setText("0101");
         firebaseFirestore = FirebaseFirestore.getInstance();
 
         Intent intent = getIntent();
-        String mobile = intent.getStringExtra("Mobile");
+        mobile = intent.getStringExtra("Mobile");
         sendVerificationCode(mobile);
 
         signIn.setOnClickListener(new View.OnClickListener() {
@@ -62,6 +74,7 @@ public class verify_otp extends AppCompatActivity {
                 }
                 Log.d("Code",code);
                 Log.d(TAG,"test "+mVerificationId);
+//                editTextCode.setError("Verified");
                 verifyVerificationCode(code);
             }
         });
@@ -131,23 +144,57 @@ public class verify_otp extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             //verification successful we will start the profile activity
-                            String uid = mAuth.getCurrentUser().getUid();
+                            final String uid = mAuth.getCurrentUser().getUid();
                             firebaseFirestore.collection("users").document(uid).get()
                                     .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
-                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                        public void onSuccess(final DocumentSnapshot documentSnapshot) {
                                             String register = documentSnapshot.getString("registered");
                                             try {
                                                 Log.d(TAG, "try + " + register);
                                                 if (register.equals("true")) {
                                                     Log.d(TAG,"Inside 1st if_try");
-                                                    Intent intent = new Intent(verify_otp.this, MainActivity.class);
+                                                    final Intent intent = new Intent(verify_otp.this, MainActivity.class);
                                                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                    startActivity(intent);
+                                                    //Saving Id and name in shared resources
+
+                                                    SharedPreferences sharedPreferences = getSharedPreferences("user_details",MODE_PRIVATE);
+                                                    final SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                                                    FirebaseMessaging.getInstance().subscribeToTopic("updates");
+
+                                                    FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(new OnSuccessListener<InstanceIdResult>() {
+                                                        @Override
+                                                        public void onSuccess(InstanceIdResult instanceIdResult) {
+                                                            String newToken = instanceIdResult.getToken();
+                                                            Log.d("new token",newToken);
+                                                            Map<String, Object> token = new HashMap<>();
+                                                            token.put("token",newToken);
+                                                            firebaseFirestore.collection("users").document(uid).update(token).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                @Override
+                                                                public void onSuccess(Void aVoid) {
+                                                                    //nothing
+                                                                    startActivity(intent);
+                                                                }
+                                                            });
+//                                                            getPreferences(Context.MODE_PRIVATE).edit().putString("fb", newToken).apply();
+                                                        }
+                                                    });
+
+//                                                    Log.d("newToken", getActivity().getPreferences(Context.MODE_PRIVATE).getString("fb", "empty :("));
+
+
+
+                                                    editor.putString("uid",uid);
+                                                    editor.putString("name",documentSnapshot.getString("name"));
+                                                    editor.putString("number",mobile);
+                                                    editor.putString("registered","true");
+                                                    editor.apply();
                                                 } else {
                                                     Log.d(TAG,"Inside else_try");
                                                     Intent intent = new Intent(verify_otp.this, Details_enter.class);
                                                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                    intent.putExtra("mobile",mobile);
                                                     startActivity(intent);
                                                 }
                                             }
@@ -184,7 +231,7 @@ public class verify_otp extends AppCompatActivity {
 
                                 }
                             });
-                            snackbar.show();
+//                            snackbar.show();
                         }
                     }
                 });

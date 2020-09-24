@@ -1,50 +1,294 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:orientation="vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<LinearLayout android:orientation="vertical"
+    android:layout_marginStart="15dp"
+    android:layout_marginEnd="15dp"
+    android:layout_marginTop="10dp"
+    android:padding="10dp"
+    android:elevation="20dp"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@drawable/white_box_round10"
+    android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Title of task"
-        android:textSize="20dp"
-        android:textStyle="bold" />
-    <TextView
-        android:id="@+id/description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Description of task"/>
-    <TextView
-        android:id="@+id/due_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Status : Overdue/Pending"/>
-    <Button
+    <LinearLayout
+        android:weightSum="15"
         android:layout_width="match_parent"
-        android:layout_height="5dp"
-        android:background="#000"
-        android:alpha="0.3"/>
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_weight="5"
+            android:layout_height="wrap_content"
+            android:text="Title of task"
+            android:textSize="17sp"
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="5"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/due_date"
+                android:textSize="15sp"
+                android:layout_width="wrap_content"
+                android:layout_gravity="end"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="Due Date" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <ImageButton
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@mipmap/ic_launcher_round"/><ImageButton
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:src="@mipmap/ic_launcher_round"/><ImageButton
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:src="@mipmap/ic_launcher_round"/>
-        <Button
+
+
+        <TextView
+            android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="150dp"
-            android:text="Complete"/>
+            android:text="Description of task"
+            android:textColor="#000" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <TextView
+            android:id="@+id/priority"
+            android:layout_width="0dp"
+            android:layout_weight="5"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:text="Normal"
+            android:textColor="#FFC107" />
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_weight="5"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/task_by"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Task By: "
+                    android:textColor="#FFC107"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/task_assigned_by"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Name"
+                    android:textColor="#FFC107"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/task_to"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Task to: "
+                    android:textColor="#FFC107"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/name_task_assigned_to"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Name"
+                    android:textColor="#FFC107"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="5dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#0070C0"
+            android:text="Status: "
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#0070C0"
+            android:text="Loading.."
+            android:textSize="17sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:background="#000"
+        android:alpha="0.3" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/work_history"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone"/>
+    <EditText
+        android:id="@+id/editText_work"
+        android:padding="10dp"
+        android:layout_marginTop="10dp"
+        android:visibility="gone"
+        android:hint="Describe your work"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/edittext_curved_box"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+            <LinearLayout
+                android:id="@+id/admin_buttons"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"
+                android:visibility="gone">
+
+                <ImageView
+                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                    android:id="@+id/edit_button"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="3dp"
+                    android:src="@drawable/ic_edit" />
+
+                <ImageView
+                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                    android:id="@+id/delete_button"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="3dp"
+                    android:src="@drawable/ic_delete" />
+
+                <ImageView
+                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                    android:id="@+id/notify_button"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="3dp"
+                    android:src="@drawable/ic_notify" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_weight="5"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/btn_complete"
+                    android:elevation="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/dashboard_color4"
+                    android:textColor="#fff"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                    android:text="Complete" />
+<!--                <ImageView-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:src="@drawable/ic_image"-->
+<!--                    android:id="@+id/image"-->
+<!--                    android:layout_margin="5dp"-->
+<!--                    android:visibility="gone"/>-->
+
+                <LinearLayout
+                    android:id="@+id/accept_reject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+                    <Button
+                        android:id="@+id/btn_accept"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Accept"
+                        android:background="@drawable/dashboard_color4"
+                        android:layout_marginEnd="10dp"
+                        android:textColor="#fff"
+                        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                        android:elevation="10dp" />
+
+                    <Button
+                        android:id="@+id/btn_reject"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Reject"
+                        android:padding="3dp"
+                        android:background="@drawable/color_red"
+                        android:textColor="#fff"
+                        android:foreground="?android:attr/selectableItemBackgroundBorderless"
+                        android:elevation="10dp" />
+
+
+                </LinearLayout>
+            </RelativeLayout>
+        </LinearLayout>
+<ImageView
+    android:layout_marginTop="10dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/image"/>
 </LinearLayout>
