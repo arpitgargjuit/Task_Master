@@ -11,15 +11,15 @@
         <item
             android:id="@+id/pending"
             android:title="@string/report_navigation2"
-            android:icon="@drawable/ic_menu_camera"/>
+            android:icon="@drawable/ic_pending"/>
         <item
             android:id="@+id/complete"
             android:title="@string/report_navigation3"
-            android:icon="@drawable/ic_menu_camera"/>
+            android:icon="@drawable/ic_complete"/>
         <item
             android:id="@+id/waiting"
             android:title="@string/report_navigation4"
-            android:icon="@drawable/ic_menu_camera"/>
+            android:icon="@drawable/ic_waiting"/>
         </group>
 
     </menu>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="@drawable/about_background"
+    tools:context=".ui.Logout.Logout">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Are you sure you want to logout?"
+        android:textColor="#fff"
+        android:textSize="20sp"
+        android:elevation="50dp"
+        android:textStyle="bold"
+        android:layout_margin="20dp"/>
+    <LinearLayout
+        android:layout_marginBottom="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+    <Button
+        android:id="@+id/cancel"
+        android:elevation="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/color_red"
+        android:textColor="#fff"
+        android:padding="10dp"
+        android:layout_margin="20dp"
+        android:text="Cancel"/>
+        <Button
+            android:elevation="20dp"
+        android:id="@+id/logout"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+        android:background="@drawable/dashboard_color4"
+        android:textColor="#fff"
+        android:padding="10dp"
+        android:text="Confirm"/>
+    </LinearLayout>
+
+</LinearLayout>

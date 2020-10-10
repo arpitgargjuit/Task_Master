@@ -1,20 +1,26 @@
 package com.cbitts.taskmanager.ui.Task;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,13 +33,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.cbitts.taskmanager.MainActivity;
+import com.cbitts.taskmanager.NotificationHelper;
 import com.cbitts.taskmanager.R;
+import com.cbitts.taskmanager.ui.Report.Completed_report_dataSetter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +61,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
     int holder_edit;
     final String TAG = "recyclerView_adapter";
     CustomObject object;
+    NotificationHelper notificationHelper = new NotificationHelper();
 
     public recyclerView_adapter_tasks(Context context, List<ModelClass_Task> task_list, int holder_edit, CustomObject object) {
         this.context = context;
@@ -72,6 +83,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
         final viewHolder itemViewHolder = (viewHolder) holder;
         final ModelClass_Task task_data = task_list.get(position);
+
 //        if (task_data.getFlag().equals("0")){
 //            itemViewHolder.image.setVisibility(View.GONE);
 //        }
@@ -86,6 +98,60 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
 //                e.printStackTrace();
 //            }
 //        }
+//        try {
+//            if (task_data.getFlag().equals("1")){
+//                itemViewHolder.Image_btn.setVisibility(View.VISIBLE);
+//                Log.d("adapter_task","flag is 1");
+//            }
+//            else {
+//                itemViewHolder.Image_btn.setVisibility(View.GONE);
+//                Log.d("adapter_task","flag is 0");
+//            }
+//            itemViewHolder.Image_btn.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    Dialog settingsDialog = new Dialog(context);
+//                    settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+//                    LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+//                    settingsDialog.setContentView(inflater.inflate(R.layout.dialog_image, null));
+//                    itemViewHolder.image = settingsDialog.findViewById(R.id.image_view);
+
+//                    Log.d("image",task_data.getImage()+"");
+//                    Picasso.get().load(task_data.getImage())
+//                            .fit()
+//                            .centerCrop()
+//                            .into(itemViewHolder.image);
+//                    settingsDialog.show();
+
+        //No Use
+//            final Dialog builder = new Dialog(context);
+//            builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//            builder.getWindow().setBackgroundDrawable(
+//                    new ColorDrawable(android.graphics.Color.TRANSPARENT));
+//            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+//                @Override
+//                public void onDismiss(DialogInterface dialogInterface) {
+//                    nothing;
+//                    builder.dismiss();
+//                }
+//            });
+//
+//            ImageView imageView = new ImageView(context);
+//            imageView.setImageURI(imageUri);
+//            builder.addContentView(imageView, new RelativeLayout.LayoutParams(
+//                    ViewGroup.LayoutParams.MATCH_PARENT,
+//                    ViewGroup.LayoutParams.MATCH_PARENT));
+//            builder.show();
+
+        //No use
+//                }
+//            });
+
+
+//                } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.d("adapter_task","exception: "+e.toString());
+//        }
 
         if (!task_data.getCreated_id().equals(uid)) {
             try {
@@ -97,6 +163,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                 itemViewHolder.task_by.setVisibility(View.VISIBLE);
                 itemViewHolder.priority.setText(task_data.getPriority());
                 itemViewHolder.name_creator.setText(task_data.getCreated_name());
+                itemViewHolder.create_date.setText(task_data.getCreateDate());
                 String status = task_data.getStatus();
                 itemViewHolder.status.setText(status);
                 if (!TextUtils.isEmpty(task_data.getDescription_work())){
@@ -116,6 +183,18 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                     itemViewHolder.accept_reject.setVisibility(View.GONE);
                     itemViewHolder.Complete.setVisibility(View.VISIBLE);
                     itemViewHolder.editText_work_description.setVisibility(View.VISIBLE);
+                }
+                else if (status.equals("Completed")){
+                    itemViewHolder.accept_reject.setVisibility(View.GONE);
+                    itemViewHolder.admin_btn.setVisibility(View.GONE);
+                    itemViewHolder.status.setTextColor(Color.GREEN);
+                    itemViewHolder.delete_completed.setVisibility(View.VISIBLE);
+                }
+                else if (status.startsWith("Deleted by")||status.startsWith("Rejected by")){
+                    itemViewHolder.delete_completed.setVisibility(View.VISIBLE);
+                    itemViewHolder.admin_btn.setVisibility(View.GONE);
+                    itemViewHolder.accept_reject.setVisibility(View.GONE);
+                    itemViewHolder.status.setTextColor(Color.RED);
                 }
                 itemViewHolder.Complete.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -151,6 +230,12 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                         markreject(task_data);
                     }
                 });
+                itemViewHolder.delete_completed.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        completed_delete(task_data);
+                    }
+                });
             } catch (Exception e) {
                 Log.d("Exception", e.toString());
             }
@@ -161,10 +246,12 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             itemViewHolder.description.setText(task_data.getDescription());
             itemViewHolder.date.setText(task_data.getDate());
             itemViewHolder.priority.setText(task_data.getPriority());
+            itemViewHolder.create_date.setText(task_data.getCreateDate());
             String status = task_data.getStatus();
             itemViewHolder.status.setText(status);
             itemViewHolder.task_to.setVisibility(View.VISIBLE);
             itemViewHolder.task_by.setVisibility(View.GONE);
+            Log.d("status_error",status);
             if (!TextUtils.isEmpty(task_data.getDescription_work())){
                 itemViewHolder.work_description.setVisibility(View.VISIBLE);
                 itemViewHolder.work_description.setText(task_data.getDescription_work());
@@ -199,15 +286,22 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                 itemViewHolder.editText_work_description.setHint("Comment");
             }
 
-            if (status.equals("Deleted by: "+name)){
-                itemViewHolder.accept_reject.setVisibility(View.GONE);
-                itemViewHolder.admin_btn.setVisibility(View.GONE);
-                itemViewHolder.status.setTextColor(Color.RED);
-            }
-            else if (status.equals("Completed")){
+//            if (status.equals("Deleted by: "+name)){
+//                itemViewHolder.accept_reject.setVisibility(View.GONE);
+//                itemViewHolder.admin_btn.setVisibility(View.GONE);
+//                itemViewHolder.status.setTextColor(Color.RED);
+//            }
+            if (status.equals("Completed")){
                 itemViewHolder.accept_reject.setVisibility(View.GONE);
                 itemViewHolder.admin_btn.setVisibility(View.GONE);
                 itemViewHolder.status.setTextColor(Color.GREEN);
+                itemViewHolder.delete_completed.setVisibility(View.VISIBLE);
+            }
+            else if (status.startsWith("Deleted by")||status.startsWith("Rejected by")){
+                itemViewHolder.delete_completed.setVisibility(View.VISIBLE);
+                itemViewHolder.admin_btn.setVisibility(View.GONE);
+                itemViewHolder.accept_reject.setVisibility(View.GONE);
+                itemViewHolder.status.setTextColor(Color.RED);
             }
             itemViewHolder.accept.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -272,20 +366,79 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                     activity.getSupportFragmentManager().beginTransaction().replace(holder_edit,fragment).addToBackStack(null).commit();
                 }
             });
+            itemViewHolder.delete_completed.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    completed_delete_admin(task_data);
+                }
+            });
+            itemViewHolder.notify.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    notify_user(task_data);
+                }
+            });
+
         }
     }
 
-    private void reject_admin(ModelClass_Task task_data) {
-        String name = getshared.getString("name", null);
+    private void completed_delete(ModelClass_Task task_data) {
+        Map<String, Object> status = new HashMap<>();
+        status.put("assigned_to","UbMTtUzDOSajMtqFRX3wYP1b3QD2");
+        firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(context, "Task Deleted successfully", Toast.LENGTH_SHORT).show();
+                        getUpdateData();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(context, "Some problem occurred", Toast.LENGTH_SHORT).show();
+                Log.d("error",e.toString());
+            }
+        });
+    }
+
+    private void completed_delete_admin(ModelClass_Task task_data) {
+        Map<String, Object> status = new HashMap<>();
+        status.put("created_by_uid","fnXIlv2F81gp9Q98yYmgrnLU64N2");
+        firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(context, "Task successfully deleted", Toast.LENGTH_SHORT).show();
+//                        getUpdateData_complete();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(context, "Some problem occurred", Toast.LENGTH_SHORT).show();
+                Log.d("error",e.toString());
+            }
+        });
+    }
+
+
+    private void notify_user(ModelClass_Task task_data) {
+        notificationHelper.sendNotificationTune2(task_data.getAssigned_id(),"Reminder for the task from: \n"+task_data.getCreated_name());
+        Toast.makeText(context, "Notification sent", Toast.LENGTH_SHORT).show();
+    }
+
+    private void reject_admin(final ModelClass_Task task_data) {
+        final String name = getshared.getString("name", null);
         Map<String, Object> status = new HashMap<>();
         status.put("status","Rejected work by: "+name);
+        status.put("timestamp_1", Timestamp.now());
         status.put("description_work",task_data.getDescription_work());
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(context, "Task marked as rejected", Toast.LENGTH_SHORT).show();
-                        getUpdateData();
+//                        getUpdateData_complete();
+                        notificationHelper.sendNotificationTune2(task_data.getAssigned_id(),"Work Rejected by \n"+name);
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -302,14 +455,23 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
         task_modelClass.getdata();
     }
 
-    private void deleteTask(ModelClass_Task task_data) {
-        String name = getshared.getString("name", null);
+    private void getUpdateData_complete(){
+        Completed_report_dataSetter dataSetter;
+        dataSetter = new Completed_report_dataSetter(object.getContext(),object.getRecyclerView(),object.getActivity(),object.getLoading(),object.getHolder_edit(),object.getFilter());
+        dataSetter.getdata();
+    }
+
+    private void deleteTask(final ModelClass_Task task_data) {
+        final String name = getshared.getString("name", null);
         Map<String,Object> status = new HashMap<>();
         status.put("status","Deleted by: "+name);
+        status.put("timestamp_1", Timestamp.now());
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(context, "Task Marked as Deleted", Toast.LENGTH_SHORT).show();
+                getUpdateData();
+                notificationHelper.sendNotificationTune2(task_data.getAssigned_id(),"Task Deleted by \n"+name);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -319,9 +481,10 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
         });
     }
 
-    private void markcompleteAdmin(ModelClass_Task task_data) {
+    private void markcompleteAdmin(final ModelClass_Task task_data) {
         Map<String,Object> status = new HashMap<>();
         status.put("status","Completed");
+        status.put("timestamp_1", Timestamp.now());
         status.put("description_work",task_data.getDescription_work());
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status)
         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -329,6 +492,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             public void onSuccess(Void aVoid) {
                 Toast.makeText(context, "Task marked as Completed", Toast.LENGTH_SHORT).show();
                 getUpdateData();
+                notificationHelper.sendNotificationTune2(task_data.getAssigned_id(),"Work Accepted by \n"+task_data.getCreated_name());
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -338,15 +502,17 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
         });
     }
 
-    private void markreject(ModelClass_Task task_data) {
-        String name = getshared.getString("name", null);
+    private void markreject(final ModelClass_Task task_data) {
+        final String name = getshared.getString("name", null);
         Map<String, Object> status = new HashMap<>();
         status.put("status", "Rejected by " + name);
+        status.put("timestamp_1", Timestamp.now());
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(context, "Task marked as rejected", Toast.LENGTH_SHORT).show();
                 getUpdateData();
+                notificationHelper.sendNotificationTune2(task_data.getCreated_id(),"Task Rejected by \n"+name);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -356,15 +522,17 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
         });
     }
 
-    private void markcomplete(ModelClass_Task task_data) {
+    private void markcomplete(final ModelClass_Task task_data) {
         Map<String, Object> status = new HashMap<>();
         status.put("status", "Waiting confirmation");
+        status.put("timestamp_1", Timestamp.now());
         status.put("description_work",task_data.getDescription_work());
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(context, "Task Marked as completed", Toast.LENGTH_SHORT).show();
                 getUpdateData();
+                notificationHelper.sendNotificationTune2(task_data.getCreated_id(),"Work completed by: \n" + task_data.getAssigned_name());
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -374,7 +542,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
         });
     }
 
-    private void accept(ModelClass_Task task_data) {
+    private void accept(final ModelClass_Task task_data) {
         Map<String, Object> status = new HashMap<>();
         status.put("status", "pending");
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -382,6 +550,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             public void onSuccess(Void aVoid) {
                 Toast.makeText(context, "Task Marked as accepted", Toast.LENGTH_SHORT).show();
                 getUpdateData();
+                notificationHelper.sendNotificationTune2(task_data.getCreated_id(),"Task accepted by: \n" + task_data.getAssigned_name());
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -400,11 +569,12 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
     }
 
     public class viewHolder extends RecyclerView.ViewHolder {
-        TextView title, description, date, priority, name_creator, status,assigned_name,work_description;
+        TextView title, description, date, priority, name_creator, status,assigned_name,work_description,Image_btn, create_date;
         Button Complete, reject, accept;
+        ImageButton edit,delete,notify,delete_completed;
         EditText editText_work_description;
         LinearLayout accept_reject,task_by,task_to,admin_btn;
-        ImageView edit,delete,notify,image;
+        ImageView image;
 
         public viewHolder(@NonNull View itemView) {
             super(itemView);
@@ -427,7 +597,10 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             notify = itemView.findViewById(R.id.notify_button);
             editText_work_description = itemView.findViewById(R.id.editText_work);
             work_description = itemView.findViewById(R.id.work_history);
-            image = itemView.findViewById(R.id.image);
+//            image = itemView.findViewById(R.id.image);
+            Image_btn = itemView.findViewById(R.id.image_btn);
+            delete_completed = itemView.findViewById(R.id.delete_button_completed);
+            create_date = itemView.findViewById(R.id.create_date);
         }
     }
 }

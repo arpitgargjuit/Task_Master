@@ -1,5 +1,6 @@
 package com.cbitts.taskmanager;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -19,6 +20,9 @@ public class MobileEnter extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mobile_enter);
+
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.hide();
 
         mobileNumber = findViewById(R.id.mobile_number);
         Next = findViewById(R.id.next);

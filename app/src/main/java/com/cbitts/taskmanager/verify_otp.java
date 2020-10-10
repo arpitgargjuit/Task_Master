@@ -1,6 +1,7 @@
 package com.cbitts.taskmanager;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -32,6 +33,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.onesignal.OneSignal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +60,9 @@ public class verify_otp extends AppCompatActivity {
 //        pinView = findViewById(R.id.pin_view);
 //        pinView.setText("0101");
         firebaseFirestore = FirebaseFirestore.getInstance();
+
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.hide();
 
         Intent intent = getIntent();
         mobile = intent.getStringExtra("Mobile");
@@ -170,6 +175,14 @@ public class verify_otp extends AppCompatActivity {
                                                             Log.d("new token",newToken);
                                                             Map<String, Object> token = new HashMap<>();
                                                             token.put("token",newToken);
+
+                                                            OneSignal.startInit(verify_otp.this)
+                                                                    .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
+                                                                    .unsubscribeWhenNotificationsAreDisabled(true)
+                                                                    .init();
+
+                                                            OneSignal.sendTag("id",uid);
+
                                                             firebaseFirestore.collection("users").document(uid).update(token).addOnSuccessListener(new OnSuccessListener<Void>() {
                                                                 @Override
                                                                 public void onSuccess(Void aVoid) {
@@ -189,6 +202,10 @@ public class verify_otp extends AppCompatActivity {
                                                     editor.putString("name",documentSnapshot.getString("name"));
                                                     editor.putString("number",mobile);
                                                     editor.putString("registered","true");
+//                                                    SharedPreferences sharedPreferences1 = getSharedPreferences("user_details_name", MODE_PRIVATE);
+//                                                    SharedPreferences.Editor editor1 = sharedPreferences1.edit();
+//                                                    editor1.putString("name",documentSnapshot.getString("name"));
+//                                                    editor1.apply();
                                                     editor.apply();
                                                 } else {
                                                     Log.d(TAG,"Inside else_try");

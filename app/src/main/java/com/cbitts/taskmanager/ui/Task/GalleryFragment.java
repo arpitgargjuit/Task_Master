@@ -1,6 +1,7 @@
 package com.cbitts.taskmanager.ui.Task;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,21 +10,25 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.cbitts.taskmanager.Filter;
 import com.cbitts.taskmanager.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class GalleryFragment extends Fragment {
 
+    SwipeRefreshLayout swipeRefreshLayout;
     private GalleryViewModel galleryViewModel;
     RecyclerView recyclerView;
     TextView loading;
     Button all,sent,received;
-    int filter=0;
+    int filter=Filter.getFilter();
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -39,6 +44,14 @@ public class GalleryFragment extends Fragment {
         all = root.findViewById(R.id.all);
         sent = root.findViewById(R.id.sent);
         received = root.findViewById(R.id.received);
+        swipeRefreshLayout = root.findViewById(R.id.refresh);
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getData();
+            }
+        });
 
 //        Black_layer= root.findViewById(R.id.taskList_fragment_black);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -60,10 +73,9 @@ public class GalleryFragment extends Fragment {
         all.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                all.setAlpha(1);
-                sent.setAlpha((float) 0.7);
-                received.setAlpha((float) 0.7);
+
                 filter = 0;
+                Filter.setFilter(filter);
                 getData();
             }
         });
@@ -71,10 +83,9 @@ public class GalleryFragment extends Fragment {
         sent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                all.setAlpha((float) 0.7);
-                sent.setAlpha(1);
-                received.setAlpha((float) 0.7);
+
                 filter = 1;
+                Filter.setFilter(filter);
                 getData();
             }
         });
@@ -82,10 +93,9 @@ public class GalleryFragment extends Fragment {
         received.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                all.setAlpha((float) 0.7);
-                sent.setAlpha((float) 0.7);
-                received.setAlpha(1);
+
                 filter = 2;
+                Filter.setFilter(filter);
                 getData();
             }
         });
@@ -102,10 +112,61 @@ public class GalleryFragment extends Fragment {
 
     }
 
+    private void received_color() {
+        received.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.white_box_round20));
+        sent.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.rounded_default_color));
+        all.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.rounded_default_color));
+        received.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        sent.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+        all.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+    }
+
+    private void sent_color() {
+        sent.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.white_box_round20));
+        received.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.rounded_default_color));
+        all.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.rounded_default_color));
+        sent.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        all.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+        received.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+    }
+
+    private void all_color() {
+        all.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.white_box_round20));
+        received.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.rounded_default_color));
+        sent.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.rounded_default_color));
+        all.setTextColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        sent.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+        received.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+    }
+
     private void getData() {
+
+        switch (Filter.getFilter()) {
+            case 0:
+                all_color();
+                break;
+            case 1:
+                sent_color();
+                break;
+            case 2:
+                received_color();
+                break;
+        }
+
         Task_Adapter_dataSetter task_modelClass;
-        task_modelClass = new Task_Adapter_dataSetter(getContext(),recyclerView,this.getActivity(),loading,R.id.main_task, filter);
+        task_modelClass = new Task_Adapter_dataSetter(getContext(),recyclerView,this.getActivity(),loading,R.id.main_task, Filter.getFilter());
         task_modelClass.getdata();
+
+        //todo This to be disabled inside setter class
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(swipeRefreshLayout.isRefreshing()) {
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            }
+        }, 1000);
 
 
     }

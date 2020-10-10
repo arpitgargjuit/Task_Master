@@ -141,7 +141,7 @@ public class Custondialog_userSelect extends DialogFragment {
                             tempName = documentSnapshot.getString("name");
                             tempUid = documentSnapshot.getString("id");
                             if (!tempUid.equals(curr_uid))
-                            Assign_name.add(new Name_ModelClass(tempName, tempUid));
+                            Assign_name.add(new Name_ModelClass(tempName+"\n"+documentSnapshot.getString("mobile"), tempUid));
                             adapter = new name_adapter_recyclerView(getContext(), Assign_name, addTaskGenerator);
                             recyclerView.setAdapter(adapter);
                             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

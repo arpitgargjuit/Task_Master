@@ -10,6 +10,12 @@
     <string name="menu_home">Dashboard</string>
     <string name="menu_gallery">Task Management</string>
     <string name="menu_slideshow">Reports</string>
+    <string name="menu_notification">Notifications</string>
+    <string name="menu_todo">To Do Feature</string>
+    <string name="menu_profile">Profile</string>
+    <string name="menu_About">About App</string>
+    <string name="menu_share">Share App</string>
+    <string name="menu_logout">Logout</string>
     <string name="title_activity_temp">temp</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -23,6 +29,10 @@
     <string name="tittle">Tittle of Task</string>
     <string name="description">Description</string>
     <string name="Loading">Loading...</string>
+    <string name="coming_soon">Coming Soon</string>
+    <string name="about_app">This is application is beneficial using in organisations giving tasks by the manager or team leader of the organisation. This is why it is denominated as Task Master by our team. \n\nThis is used to provide task to several subordinates and clients working in the organisation or anywhere else (Work From Home) by the manager or Team Leader. This helps you in a way that you don\'t need to go to the subordinates and clients or call them to provide them new tasks. \n\nIt is done only by just a click and sub-ordinate can submit it once it is done. This is how we can stop holding trivial meetings (means calling clients and providing tasks) providing them task only through Task Master. This application save your time..</string>
+    <string name="dedicated">This application is dedicated to Mr. Kunwar Anupam Singh (IPS). We are proudly thankful to him</string>
+    <string name="app_quote">\u0022Time flies fast, but it\'s good that you are the pilot.\u0022</string>
 
     <string-array name="priority_select">
         <item>Normal</item>

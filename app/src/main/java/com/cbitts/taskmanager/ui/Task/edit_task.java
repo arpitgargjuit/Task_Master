@@ -28,6 +28,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.cbitts.taskmanager.MainActivity;
+import com.cbitts.taskmanager.NotificationHelper;
 import com.cbitts.taskmanager.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -52,7 +53,7 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
 
     EditText title,description;
     Spinner spinner;
-    Button add,select_date;
+    Button add,select_date, select_user;
     String Priority;
     RecyclerView recyclerView;
     Add_task_generator addTaskGenerator = new Add_task_generator();
@@ -85,13 +86,14 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
         recyclerView = view.findViewById(R.id.person_list);
         select_date = view.findViewById(R.id.select_date);
         spinner.setOnItemSelectedListener(this);
+        select_user = view.findViewById(R.id.select_user);
 
         title.setText(task.getTitle());
-        if(!TextUtils.isEmpty(task.getDate())){
-        select_date.setText(task.getDate());}
-        if(!TextUtils.isEmpty(task.getDescription()))
+//        if(!TextUtils.isEmpty(task.getDate())){
+        select_date.setText(task.getDate());
+//        if(!TextUtils.isEmpty(task.getDescription()))
         description.setText(task.getDescription());
-        description.setHint("No Description");
+//        description.setHint("No Description");
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),R.array.priority_select,android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -105,6 +107,13 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
                 }
         }
     });
+
+        select_user.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showUserDialog();
+            }
+        });
 
         select_date.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,6 +131,15 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
                 if (TextUtils.isEmpty(Title)){
                     title.setError("Enter Title of the task");
                 }
+                else if (TextUtils.isEmpty(addTaskGenerator.getUid())){
+                    Toast.makeText(getContext(), "Select the user", Toast.LENGTH_SHORT).show();
+                }
+                else if (TextUtils.isEmpty(Description)){
+                    description.setError("Description is required");
+                }
+                else if (TextUtils.isEmpty(Date)){
+                    Toast.makeText(getContext(), "Please Select Due date", Toast.LENGTH_SHORT).show();
+                }
                 else {
                     upload(Title,Description,Date,Priority,addTaskGenerator.getUid());
                 }
@@ -137,6 +155,12 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
                 Calendar.getInstance().get(Calendar.DATE)
         );
         datePickerDialog.show();
+    }
+
+    private void showUserDialog() {
+        Custondialog_userSelect custondialog_userSelect = new Custondialog_userSelect();
+        custondialog_userSelect.setTargetFragment(this,1);
+        custondialog_userSelect.show(getParentFragmentManager(),"Test");
     }
 
     private void upload(String title, String description, String date, String priority, final String uid) {
@@ -158,7 +182,7 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
 
         edittask(task, TaskID);
     }
-    private void edittask(Map<String, Object> task,String taskid) {
+    private void edittask(final Map<String, Object> task, String taskid) {
         DocumentReference documentReference = firebaseFirestore.collection("tasks").document(taskid);
         documentReference.update(task).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -166,6 +190,8 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
                 Toast.makeText(getContext(), "Task Updated Successfully", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(getContext(), MainActivity.class));
                 getActivity().finish();
+                NotificationHelper notificationHelper = new NotificationHelper();
+                notificationHelper.sendNotificationTune2(task.get("assigned_to").toString(),"Task edited by: \n"+task.get("created_by_name"));
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -264,7 +290,7 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
-                            Name.add(documentSnapshot.getString("name"));
+                            Name.add(documentSnapshot.getString("name")+"\n"+documentSnapshot.getString("mobile"));
                             Uid.add(documentSnapshot.getString("id"));
                             name_adapter_recyclerView_edit adapter = new name_adapter_recyclerView_edit(getContext(),Name,Uid,addTaskGenerator, task.getAssigned_id(),task.getAssigned_name());
                             recyclerView.setAdapter(adapter);

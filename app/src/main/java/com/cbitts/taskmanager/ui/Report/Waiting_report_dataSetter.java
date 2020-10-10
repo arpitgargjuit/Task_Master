@@ -19,6 +19,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -88,15 +89,16 @@ public class Waiting_report_dataSetter {
     }
 
     private void getassignedtask() {
-        firebaseFirestore.collection("tasks").whereEqualTo("created_by_uid",uid).get()
+        firebaseFirestore.collection("tasks").whereEqualTo("created_by_uid",uid).orderBy("timestamp_1", Query.Direction.DESCENDING).get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String temp_title, temp_description, temp_date, temp_priority, temp_assignid, temp_assignname, temp_status, temp_taskid, temp_work_description;
+                        String temp_title, temp_description, temp_date, temp_priority, temp_assignid, temp_assignname, temp_status, temp_taskid, temp_work_description, temp_createDate;
                         for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
                             temp_title = documentSnapshot.getString("title");
                             temp_description = documentSnapshot.getString("description");
                             temp_date = documentSnapshot.getString("due_date");
+                            temp_createDate = documentSnapshot.getString("create_date");
                             temp_priority = documentSnapshot.getString("priority");
                             temp_assignid = documentSnapshot.getString("assigned_to");
                             temp_assignname = documentSnapshot.getString("assigned_to_name");
@@ -104,7 +106,7 @@ public class Waiting_report_dataSetter {
                             temp_taskid = documentSnapshot.getString("task_id");
                             temp_work_description = documentSnapshot.getString("description_work");
                             if (temp_status.equals("Waiting confirmation"))
-                                task_list.add(new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid, temp_assignid,temp_assignname,uid,name, temp_work_description,"0"));
+                                task_list.add(new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid, temp_assignid,temp_assignname,uid,name, temp_work_description,"0", temp_createDate));
                         }
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
                         recyclerView.setLayoutManager(layoutManager);
@@ -128,15 +130,16 @@ public class Waiting_report_dataSetter {
     }
 
     private void getcreatedtask(){
-        firebaseFirestore.collection("tasks").whereEqualTo("assigned_to",uid).get()
+        firebaseFirestore.collection("tasks").whereEqualTo("assigned_to",uid).orderBy("timestamp_1", Query.Direction.DESCENDING).get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String temp_title, temp_description, temp_date, temp_priority, temp_creatorid, temp_creatorname, temp_status, temp_taskid, temp_work_description;
+                        String temp_title, temp_description, temp_date, temp_priority, temp_creatorid, temp_creatorname, temp_status, temp_taskid, temp_work_description, temp_createDate;
                         for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
                             temp_title = documentSnapshot.getString("title");
                             temp_description = documentSnapshot.getString("description");
                             temp_date = documentSnapshot.getString("due_date");
+                            temp_createDate = documentSnapshot.getString("create_date");
                             temp_priority = documentSnapshot.getString("priority");
                             temp_creatorid = documentSnapshot.getString("created_by_uid");
                             temp_creatorname = documentSnapshot.getString("created_by_name");
@@ -144,7 +147,7 @@ public class Waiting_report_dataSetter {
                             temp_taskid = documentSnapshot.getString("task_id");
                             temp_work_description = documentSnapshot.getString("description_work");
                             if (temp_status.equals("Waiting confirmation"))
-                                task_list.add(new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid,uid,name,temp_creatorid,temp_creatorname, temp_work_description,"0"));
+                                task_list.add(new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid,uid,name,temp_creatorid,temp_creatorname, temp_work_description,"0", temp_createDate));
                         }
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
                         recyclerView.setLayoutManager(layoutManager);

@@ -1,87 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#e9e9e9"
     android:layout_width="match_parent"
-    android:orientation="vertical"
+    android:id="@+id/refresh"
     android:layout_height="match_parent">
-    <FrameLayout
+
+    <RelativeLayout
+        android:background="#e9e9e9"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/main_task"/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:weightSum="11"
         android:orientation="vertical"
-        android:background="#e9e9e9">
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/main_task" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:weightSum="11"
             android:orientation="vertical"
-            android:weightSum="14">
+            android:background="#e9e9e9">
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_margin="10dp"
-                android:gravity="center_vertical"
-                android:layout_weight="1">
-                <Button
-                    android:id="@+id/all"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:background="@drawable/more_round_corner_color1"
-                    android:textColor="#fff"
-                    android:text="All"/>
-                <Button
-                    android:id="@+id/received"
-                    android:layout_width="wrap_content"
-                    android:background="@drawable/more_round_corner_color1"
-                    android:textColor="#fff"
-                    android:padding="10dp"
-                    android:layout_marginStart="5dp"
-                    android:alpha="0.7"
-                    android:layout_height="wrap_content"
-                    android:text="Received"/>
-                <Button
-                    android:id="@+id/sent"
-                    android:layout_width="wrap_content"
-                    android:background="@drawable/more_round_corner_color1"
-                    android:textColor="#fff"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp"
-                    android:padding="10dp"
-                    android:alpha="0.7"
-                    android:layout_height="wrap_content"
-                    android:text="Task Sent"/>
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:weightSum="14">
 
-            </LinearLayout>
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="13">
-                <TextView
-                    android:id="@+id/loading_text"
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_centerHorizontal="true"
-                    android:textSize="20sp"
-                    android:text="Loading..." />
-                <androidx.recyclerview.widget.RecyclerView
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:background="@drawable/rounded_default_color"
+                    android:layout_marginStart="20sp"
+                    android:layout_marginTop="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginEnd="20dp">
+
+                    <Button
+                        android:id="@+id/all"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="20dp"
+                        android:background="@drawable/white_box_round20"
+                        android:textColor="@color/colorPrimary"
+                        android:text="All" />
+
+                    <Button
+                        android:id="@+id/received"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="20dp"
+                        android:textColor="#fff"
+                        android:background="@drawable/rounded_default_color"
+                        android:text="Received" />
+
+                    <Button
+                        android:id="@+id/sent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textColor="#fff"
+                        android:background="@drawable/rounded_default_color"
+                        android:text="Sent" />
+                </LinearLayout>
+
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:id="@+id/report_list"
-                    android:visibility="gone"
-                    tools:context=".ui.Report.report_pending">
+                    android:layout_height="0dp"
+                    android:layout_weight="13">
 
-                </androidx.recyclerview.widget.RecyclerView>
-            </RelativeLayout>
+                    <TextView
+                        android:id="@+id/loading_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_centerHorizontal="true"
+                        android:textSize="20sp"
+                        android:text="Loading..." />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/report_list"
+                        android:visibility="gone"
+                        tools:context=".ui.Report.report_pending">
+
+                    </androidx.recyclerview.widget.RecyclerView>
+                </RelativeLayout>
+            </LinearLayout>
+
+
         </LinearLayout>
-
-
-    </LinearLayout>
-</RelativeLayout>
+    </RelativeLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

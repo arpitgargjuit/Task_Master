@@ -1,5 +1,6 @@
 package com.cbitts.taskmanager.ui.Task;
 
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -17,14 +18,23 @@ public class ModelClass_Task implements Serializable {
     private String Status;
     private String TaskId;
     private String Description_work;
-    private String Image;
+    private Uri Image;
     private String flag;
+    private String createDate;
 
-    public String getImage() {
+    public String getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
+    }
+
+    public Uri getImage() {
         return Image;
     }
 
-    public void setImage(String image) {
+    public void setImage(Uri image) {
         Image = image;
     }
 
@@ -69,7 +79,7 @@ public class ModelClass_Task implements Serializable {
         this.flag = flag;
     }
 
-    public ModelClass_Task(String title, String description, String date, String priority, String status, String taskId, String assigned_id, String assigned_name, String created_id, String created_name, String description_work, String flag) {
+    public ModelClass_Task(String title, String description, String date, String priority, String status, String taskId, String assigned_id, String assigned_name, String created_id, String created_name, String description_work, String flag, String createDate) {
         Title = title;
         Description = description;
         Date = date;
@@ -81,6 +91,7 @@ public class ModelClass_Task implements Serializable {
         Created_id = created_id;
         Created_name = created_name;
         Description_work = description_work;
+        this.createDate = createDate;
         this.flag = flag;
         Log.d(TAG, "Value of description is " + Description_work);
     }

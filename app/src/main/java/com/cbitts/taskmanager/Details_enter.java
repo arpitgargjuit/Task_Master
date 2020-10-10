@@ -68,12 +68,16 @@ public class Details_enter extends AppCompatActivity {
 
                                     SharedPreferences sharedPreferences = getSharedPreferences("user_details", MODE_PRIVATE);
                                     SharedPreferences.Editor editor = sharedPreferences.edit();
+//                                    SharedPreferences sharedPreferences1 = getSharedPreferences("user_details_name", MODE_PRIVATE);
+//                                    SharedPreferences.Editor editor1 = sharedPreferences1.edit();
 
                                     editor.putString("uid", uid);
                                     editor.putString("name", Name);
+//                                    editor1.putString("name",Name);
                                     editor.putString("number", getIntent().getStringExtra("mobile"));
                                     editor.putString("registered", "true");
                                     editor.apply();
+//                                    editor1.apply();
                                     Intent intent = new Intent(Details_enter.this, MainActivity.class);
                                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                     startActivity(intent);

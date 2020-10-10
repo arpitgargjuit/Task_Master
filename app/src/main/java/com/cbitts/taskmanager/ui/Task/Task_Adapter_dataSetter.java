@@ -21,10 +21,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +42,7 @@ public class Task_Adapter_dataSetter {
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     int holder_edit, filter;
     CustomObject object;
+    Uri temp_imageUri;
 
     public Task_Adapter_dataSetter(Context context, RecyclerView recyclerView, Activity activity, TextView loading, int holder_edit, int filter) {
         this.recyclerView = recyclerView;
@@ -92,25 +95,45 @@ public class Task_Adapter_dataSetter {
     }
 
     private void getassignedtask() {
-        firebaseFirestore.collection("tasks").whereEqualTo("created_by_uid",uid).get()
+    firebaseFirestore.collection("tasks").orderBy("timestamp_1", Query.Direction.DESCENDING).whereEqualTo("created_by_uid",uid).get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String temp_title, temp_description, temp_date, temp_priority, temp_assignid, temp_assignname, temp_status, temp_taskid, temp_work_description,temp_flag;
+                        String temp_title, temp_description, temp_date, temp_priority, temp_assignid, temp_assignname, temp_status, temp_taskid, temp_work_description,temp_flag, temp_createDate;
                         for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
                             temp_title = documentSnapshot.getString("title");
                             temp_description = documentSnapshot.getString("description");
                             temp_date = documentSnapshot.getString("due_date");
+                            temp_createDate = documentSnapshot.getString("create_date");
                             temp_priority = documentSnapshot.getString("priority");
                             temp_assignid = documentSnapshot.getString("assigned_to");
                             temp_assignname = documentSnapshot.getString("assigned_to_name");
                             temp_status = documentSnapshot.getString("status");
                             temp_taskid = documentSnapshot.getString("task_id");
                             temp_work_description = documentSnapshot.getString("description_work");
-                            temp_flag = documentSnapshot.getString("flag");
+                            temp_flag = documentSnapshot.getString("image");
+                            if (temp_flag.equals("1")){
+                                FirebaseStorage.getInstance().getReference().child("document/*"+temp_taskid).getDownloadUrl()
+                                        .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                            @Override
+                                            public void onSuccess(Uri uri) {
 
-                            if (!temp_status.equals("Completed")&&!temp_status.startsWith("Deleted"))
-                            task_list.add(new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid, temp_assignid,temp_assignname,uid,name,temp_work_description,temp_flag));
+                                                temp_imageUri = uri;
+
+                                                //todo store the retrieved image in object ang pass to modelclass.setimage
+
+                                            }
+                                        });
+                            }
+
+                            if (!temp_status.equals("Completed")&&!temp_status.startsWith("Deleted")&&(!temp_status.startsWith("Rejected by"))) {
+                                Log.d("taskSetter",temp_work_description+"size is "+task_list.size());
+                                ModelClass_Task modelClass_task = new ModelClass_Task(temp_title, temp_description, temp_date, temp_priority, temp_status, temp_taskid, temp_assignid, temp_assignname, uid, name, temp_work_description, temp_flag, temp_createDate);
+                                task_list.add(modelClass_task);
+                                if (temp_flag.equals("1")){
+                                    modelClass_task.setImage(temp_imageUri);
+                                }
+                            }
                         }
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
                         recyclerView.setLayoutManager(layoutManager);
@@ -128,41 +151,62 @@ public class Task_Adapter_dataSetter {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(context, "Something went Wrong!!", Toast.LENGTH_SHORT).show();
+                Log.d("error",e.toString());
                 loading.setText("Unable to Load");
             }
         });
     }
 
     private void getcreatedtask(){
-        firebaseFirestore.collection("tasks").whereEqualTo("assigned_to",uid).get()
+        firebaseFirestore.collection("tasks").whereEqualTo("assigned_to",uid).orderBy("timestamp_1", Query.Direction.DESCENDING).get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String temp_title, temp_description, temp_date, temp_priority, temp_creatorid, temp_creatorname, temp_status, temp_taskid, temp_work_description,temp_flag,temp_image;
+                        String temp_title, temp_description, temp_date, temp_priority, temp_creatorid, temp_creatorname, temp_status, temp_taskid, temp_work_description,temp_flag,temp_image, temp_createDate;
                         for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
                             temp_title = documentSnapshot.getString("title");
                             temp_description = documentSnapshot.getString("description");
                             temp_date = documentSnapshot.getString("due_date");
+                            temp_createDate = documentSnapshot.getString("create_date");
                             temp_priority = documentSnapshot.getString("priority");
                             temp_creatorid = documentSnapshot.getString("created_by_uid");
                             temp_creatorname = documentSnapshot.getString("created_by_name");
                             temp_status = documentSnapshot.getString("status");
                             temp_taskid = documentSnapshot.getString("task_id");
                             temp_work_description = documentSnapshot.getString("description_work");
-                            temp_flag = documentSnapshot.getString("flag");
-//                            if (temp_flag.equals("1")){
-//                                FirebaseStorage.getInstance().getReference().child("document/*"+temp_taskid).getDownloadUrl()
-//                                        .addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                                            @Override
-//                                            public void onSuccess(Uri uri) {//todo store the retrieved image in object ang pass to modelclass.setimage
-//
-//                                            }
-//                                        });
-//                            }
-                            if (!temp_status.equals("Completed")&&(!temp_status.startsWith("Deleted"))){
-                            ModelClass_Task modelClass_task = new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid,uid,name,temp_creatorid,temp_creatorname,temp_work_description,temp_flag);
+                            temp_flag = documentSnapshot.getString("image");
+                            Log.d("adapter",temp_flag);
+
+                            if (temp_flag.equals("1")){
+
+
+
+                                FirebaseStorage.getInstance().getReference().child("document/*"+temp_taskid).getDownloadUrl()
+                                        .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                            @Override
+                                            public void onSuccess(Uri uri) {
+
+
+                                                temp_imageUri = uri;
+                                                Log.d("image",uri+"");
+
+                                                //todo store the retrieved image in object ang pass to modelclass.setimage
+
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.d("image",e.getMessage());
+                                    }
+                                });
+                            }
+                            if (!temp_status.equals("Completed")&&(!temp_status.startsWith("Deleted"))&&(!temp_status.startsWith("Rejected by"))){
+                                Log.d("taskSetter",temp_work_description+"size is "+task_list.size());
+                            ModelClass_Task modelClass_task = new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid,uid,name,temp_creatorid,temp_creatorname,temp_work_description,temp_flag, temp_createDate);
                             task_list.add(modelClass_task);
-//                            modelClass_task.setImage();
+                            if (temp_flag.equals("1")) {
+                                modelClass_task.setImage(temp_imageUri);
+                            }
                             }
 
                         }
@@ -182,6 +226,7 @@ public class Task_Adapter_dataSetter {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(context, "Something went Wrong!!", Toast.LENGTH_SHORT).show();
+                Log.d("error",e.toString());
                 loading.setText("Unable to Load");
             }
         });

@@ -9,7 +9,20 @@
         android:id="@+id/nav_home"
         android:name="com.cbitts.taskmanager.ui.home.HomeFragment"
         android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_nav_home_to_nav_slideshow"
+            app:destination="@id/nav_slideshow" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_todo"
+            app:destination="@id/nav_todo" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_share"
+            app:destination="@id/nav_share" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_about"
+            app:destination="@id/nav_about" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_gallery"
@@ -22,4 +35,40 @@
         android:name="com.cbitts.taskmanager.ui.Report.SlideshowFragment"
         android:label="@string/menu_slideshow"
         tools:layout="@layout/fragment_slideshow" />
+    <fragment
+        android:id="@+id/nav_notifications"
+        android:name="com.cbitts.taskmanager.ui.notifications.Notifications"
+        android:label="@string/menu_notification"
+        tools:layout="@layout/fragment_notifications"/>
+    <fragment
+        android:id="@+id/nav_todo"
+        android:name="com.cbitts.taskmanager.ui.todo.Todo"
+        android:label="@string/menu_todo"
+        tools:layout="@layout/fragment_todo"/>
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.cbitts.taskmanager.ui.profile.Profile"
+        android:label="@string/menu_profile"
+        tools:layout="@layout/fragment_profile"/>
+    <fragment
+        android:id="@+id/nav_about"
+        android:name="com.cbitts.taskmanager.ui.aboutApp.About"
+        android:label="@string/menu_About"
+        tools:layout="@layout/fragment_about"/>
+    <fragment
+        android:id="@+id/nav_share"
+        android:name="com.cbitts.taskmanager.ui.shareApp.Share"
+        android:label="@string/menu_share"
+        tools:layout="@layout/fragment_share"/>
+    <fragment
+        android:id="@+id/nav_logout"
+        android:name="com.cbitts.taskmanager.ui.Logout.Logout"
+        android:label="@string/menu_logout"
+        tools:layout="@layout/fragment_logout">
+        <action
+            android:id="@+id/action_nav_logout_to_nav_home"
+            app:destination="@id/nav_home" />
+    </fragment>
+
+
 </navigation>

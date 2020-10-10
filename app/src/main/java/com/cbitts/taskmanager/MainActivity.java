@@ -4,9 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.widget.Toast;
 
+import com.cbitts.taskmanager.ui.Logout.Logout;
+import com.cbitts.taskmanager.ui.notifications.Notifications;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -17,8 +21,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.onesignal.OneSignal;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -48,6 +57,12 @@ public class MainActivity extends AppCompatActivity {
                 .unsubscribeWhenNotificationsAreDisabled(true)
                 .init();
 
+//                OneSignal.startInit(getContext())
+//                .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
+//                .unsubscribeWhenNotificationsAreDisabled(true)
+//                .init();
+
+
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -62,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
+                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow,R.id.nav_notifications,R.id.nav_todo,R.id.nav_about,R.id.nav_logout)
                 .setDrawerLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -84,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(this, MobileEnter.class));
             finish();
         } else {
+            OneSignal.sendTag("id",fauth.getCurrentUser().getUid());
 //            OneSignal.sendTag("User ID",fauth.getCurrentUser().getUid());
             SharedPreferences getshared = getSharedPreferences("user_details", MODE_PRIVATE);
             String uid = getshared.getString("uid", fauth.getCurrentUser().getUid());
@@ -95,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else{
                     Intent intent = new Intent(MainActivity.this, Details_enter.class);
+
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }
@@ -105,6 +122,23 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        Log.d(TAG,item.getItemId()+" optionselected");
+        if (item.getItemId()==R.id.notifications){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        Fragment fragment = new Notifications();
+        FragmentTransaction transaction = fragmentManager.beginTransaction().replace(R.id.nav_host_fragment,fragment).addToBackStack(null);
+        transaction.commit();}
+
+        return super.onOptionsItemSelected(item);
+
+
+//        FragmentTransaction transaction = getFragmentManager().beginTransaction().replace(R.id.nav_home,fragment).addToBackStack(null).commit();
+
     }
 
     @Override

@@ -27,12 +27,16 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cbitts.taskmanager.MainActivity;
+import com.cbitts.taskmanager.NotificationHelper;
 import com.cbitts.taskmanager.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -47,9 +51,12 @@ import com.squareup.picasso.Picasso;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
@@ -63,7 +70,7 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
     EditText title,description;
     Spinner spinner;
     Button add,select_date,select_user;
-    String Priority;
+    String Priority,imageurl;
     RecyclerView recyclerView;
 //    SharedPreferences mPrefs;
     Add_task_generator addTaskGenerator = new Add_task_generator();
@@ -77,10 +84,11 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
     int flag = 0;
     Uri imageuri;
 //    String Name_creator = "";
+    NotificationHelper notificationHelper;
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_add_task, container, false);
@@ -94,6 +102,7 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
         select_user = root.findViewById(R.id.select_user);
         image = root.findViewById(R.id.image);
         spinner.setOnItemSelectedListener(this);
+        notificationHelper = new NotificationHelper(getContext());
         storageReference = FirebaseStorage.getInstance().getReference();
 
 
@@ -122,6 +131,20 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
                 }
                 else if (TextUtils.isEmpty(addTaskGenerator.getUid())){
                     Toast.makeText(getContext(), "Select the user", Toast.LENGTH_SHORT).show();
+                }
+                else if (TextUtils.isEmpty(Description)){
+                    description.setError("Description is required");
+                }
+                else if (TextUtils.isEmpty(Date)){
+                    Toast.makeText(getContext(), "Please Select Due date", Toast.LENGTH_SHORT).show();
+                }
+                else if (Title.length()>30){
+                    title.setError("Title Can't be more than 30 words");
+                    Toast.makeText(getContext(), "Current words "+Title.length(), Toast.LENGTH_SHORT).show();
+                }
+                else if(Description.length()>250){
+                    description.setError("Description can't be more than 250 words");
+                    Toast.makeText(getContext(), "Current words "+Description.length(), Toast.LENGTH_SHORT).show();
                 }
                 else {
                     upload(Title,Description,Date,Priority,addTaskGenerator.getUid());
@@ -182,17 +205,23 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
         task.put("task_id",TaskID);
         task.put("description_work","");
         task.put("image",""+flag);
+        task.put("timestamp_1", Timestamp.now());
+        java.util.Date c = Calendar.getInstance().getTime();
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        String formattedDate = df.format(c);
+        task.put("create_date",formattedDate);
 
         addnewtask(task,TaskID);
 
     }
 
-    private void addnewtask(Map<String, Object> task, final String taskid) {
+    private void addnewtask(final Map<String, Object> task, final String taskid) {
         DocumentReference documentReference = firebaseFirestore.collection("tasks").document(taskid);
         documentReference.set(task).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(getContext(), "Task Created Successfully", Toast.LENGTH_SHORT).show();
+                notificationHelper.sendNotificationTune1(task.get("assigned_to").toString(),"New Task Added: \n" + task.get("title").toString()+" by "+task.get("created_by_name"));
                 startActivity(new Intent(getContext(), MainActivity.class));
                 if (flag!=0)
                     uploadpicture(taskid);
@@ -207,7 +236,10 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
         });
     }
 
-    private void sendNotification(final String uid) {
+    private void sendNotification(final String uid, final String title){
+
+        Toast.makeText(getContext(), "Current Recipients is : user1@gmail.com ( Just For Demo )", Toast.LENGTH_SHORT).show();
+
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -216,10 +248,15 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
                     StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
                             .permitAll().build();
                     StrictMode.setThreadPolicy(policy);
-
+                    String send_email;
 
                     //This is a Simple Logic to Send Notification different Device Programmatically....
-
+//                    if (MainActivity.LoggedIn_User_Email.equals("user1@gmail.com")) {
+//                        send_email = "user2@gmail.com";
+//                    } else {
+//                        send_email = "user1@gmail.com";
+//                    }
+                    send_email = uid;
 
                     try {
                         String jsonResponse;
@@ -237,10 +274,11 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
                         String strJsonBody = "{"
                                 + "\"app_id\": \"1daeff6a-541d-4c33-bc92-a0e7fe969ab8\","
 
-                                + "\"filters\": [{\"field\": \"tag\", \"key\": \"User_ID\", \"relation\": \"=\", \"value\": \"" + fAuth.getCurrentUser().getUid() + "\"}],"
+                                + "\"filters\": [{\"field\": \"tag\", \"key\": \"id\", \"relation\": \"=\", \"value\": \"" + send_email + "\"}],"
 
                                 + "\"data\": {\"foo\": \"bar\"},"
-                                + "\"contents\": {\"en\": \"English Message\"}"
+                                + "\"contents\": {\"en\": \"New Task Added\n"+title+"\"},"
+                                +"\"small_icon\":\"task_master_icon\""
                                 + "}";
 
 
@@ -266,7 +304,6 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
                             scanner.close();
                         }
                         System.out.println("jsonResponse:\n" + jsonResponse);
-                        Toast.makeText(getContext(), "notification sent", Toast.LENGTH_SHORT).show();
 
                     } catch (Throwable t) {
                         t.printStackTrace();
@@ -274,7 +311,6 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
                 }
             }
         });
-
     }
 
     @Override
@@ -343,7 +379,7 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null){
             imageuri = data.getData();
-            Picasso.with(getContext()).load(imageuri)
+            Picasso.get().load(imageuri)
                     .fit()
                     .centerCrop()
                     .into(image);
@@ -353,17 +389,26 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
 
     private void uploadpicture(String task_id) {
 
-        final ProgressDialog pd = new ProgressDialog(getContext());
-        pd.setTitle("Uplading image ...");
-        pd.show();
+//        final ProgressDialog pd = new ProgressDialog(getContext());
+//        pd.setTitle("Uplading image ...");
+//        pd.show();
 
-        StorageReference riversRef = storageReference.child("document/*"+task_id);
+        final StorageReference riversRef = storageReference.child("document/*"+task_id);
 
         riversRef.putFile(imageuri)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        pd.dismiss();
+                        try {
+                            Task<Uri> urlTask = taskSnapshot.getStorage().getDownloadUrl();
+                            while (!urlTask.isSuccessful());
+                            Uri downloadUrl = urlTask.getResult();
+                            Log.d("image",downloadUrl+"5");
+//                            Toast.makeText(getContext(), "Image Added to task", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+//                        pd.dismiss();
 //                        finish();
                         // Get a URL to the uploaded content
 //                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
@@ -372,7 +417,12 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
-                        pd.dismiss();
+                        try {
+                            Toast.makeText(getContext(), "Some Problem occurred in uploading image", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+//                        pd.dismiss();
 //                        finish();
                         // Handle unsuccessful uploads
                         // ...
@@ -381,7 +431,8 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
             @Override
             public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
                 double progressPercentage = (100.0 *taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
-                pd.setMessage("Percentage: "+(int)progressPercentage+" %");
+
+//                pd.setMessage("Percentage: "+(int)progressPercentage+" %");
             }
         });
     }
