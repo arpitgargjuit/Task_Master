@@ -1,15 +1,19 @@
 package com.cbitts.taskmanager.ui.Task;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,6 +37,8 @@ import android.widget.Toast;
 import com.cbitts.taskmanager.MainActivity;
 import com.cbitts.taskmanager.NotificationHelper;
 import com.cbitts.taskmanager.R;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -58,21 +64,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
-public class add_task extends Fragment implements AdapterView.OnItemSelectedListener,DatePickerDialog.OnDateSetListener,Custondialog_userSelect.OnInputSelected {
+public class add_task extends Fragment implements AdapterView.OnItemSelectedListener, DatePickerDialog.OnDateSetListener, Custondialog_userSelect.OnInputSelected {
 
     private static final int PICK_IMAGE_REQUEST = 1;
-    EditText title,description;
+    EditText title, description;
     Spinner spinner;
-    Button add,select_date,select_user;
-    String Priority,imageurl;
+    Button add, select_date, select_user;
+    String Priority, imageurl;
     RecyclerView recyclerView;
-//    SharedPreferences mPrefs;
+    //    SharedPreferences mPrefs;
     Add_task_generator addTaskGenerator = new Add_task_generator();
     ArrayList<Name_ModelClass> Assign_name = new ArrayList<>();
     FirebaseAuth fAuth = FirebaseAuth.getInstance();
@@ -83,8 +90,10 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
     StorageReference storageReference;
     int flag = 0;
     Uri imageuri;
-//    String Name_creator = "";
+    //    String Name_creator = "";
     NotificationHelper notificationHelper;
+    int permissionCheck;
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
 
 
     @Override
@@ -104,12 +113,10 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
         spinner.setOnItemSelectedListener(this);
         notificationHelper = new NotificationHelper(getContext());
         storageReference = FirebaseStorage.getInstance().getReference();
+        permissionCheck = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS);
 
 
-
-
-
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),R.array.priority_select,android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.priority_select, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
@@ -126,28 +133,22 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
 
                 String Title = title.getText().toString();
                 String Description = description.getText().toString();
-                if (TextUtils.isEmpty(Title)){
+                if (TextUtils.isEmpty(Title)) {
                     title.setError("Enter Title of the task");
-                }
-                else if (TextUtils.isEmpty(addTaskGenerator.getUid())){
+                } else if (TextUtils.isEmpty(addTaskGenerator.getUid())) {
                     Toast.makeText(getContext(), "Select the user", Toast.LENGTH_SHORT).show();
-                }
-                else if (TextUtils.isEmpty(Description)){
+                } else if (TextUtils.isEmpty(Description)) {
                     description.setError("Description is required");
-                }
-                else if (TextUtils.isEmpty(Date)){
+                } else if (TextUtils.isEmpty(Date)) {
                     Toast.makeText(getContext(), "Please Select Due date", Toast.LENGTH_SHORT).show();
-                }
-                else if (Title.length()>30){
+                } else if (Title.length() > 30) {
                     title.setError("Title Can't be more than 30 words");
-                    Toast.makeText(getContext(), "Current words "+Title.length(), Toast.LENGTH_SHORT).show();
-                }
-                else if(Description.length()>250){
+                    Toast.makeText(getContext(), "Current words " + Title.length(), Toast.LENGTH_SHORT).show();
+                } else if (Description.length() > 250) {
                     description.setError("Description can't be more than 250 words");
-                    Toast.makeText(getContext(), "Current words "+Description.length(), Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    upload(Title,Description,Date,Priority,addTaskGenerator.getUid());
+                    Toast.makeText(getContext(), "Current words " + Description.length(), Toast.LENGTH_SHORT).show();
+                } else {
+                    upload(Title, Description, Date, Priority, addTaskGenerator.getUid());
                 }
             }
         });
@@ -155,7 +156,19 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
         select_user.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showUserDialog();
+
+                permissionCheck = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS);
+                Log.d("check", permissionCheck + "");
+
+                if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                    //Name of Method for Calling Message
+                    showUserDialog();
+                    Log.d("check", "permission approved");
+                } else {
+                    ActivityCompat.requestPermissions(getActivity(),
+                            new String[]{Manifest.permission.READ_CONTACTS},
+                            PERMISSIONS_REQUEST_READ_CONTACTS);
+                }
             }
         });
 
@@ -171,8 +184,8 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
 
     private void showUserDialog() {
         Custondialog_userSelect custondialog_userSelect = new Custondialog_userSelect();
-        custondialog_userSelect.setTargetFragment(this,1);
-        custondialog_userSelect.show(getParentFragmentManager(),"Test");
+        custondialog_userSelect.setTargetFragment(this, 1);
+        custondialog_userSelect.show(getParentFragmentManager(), "Test");
     }
 
     private void showDatePicker() {
@@ -192,26 +205,26 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
 
         SharedPreferences getshared = this.getActivity().getSharedPreferences("user_details", MODE_PRIVATE);
 
-        final Map<String,Object> task = new HashMap<>();
-        task.put("assigned_to",uid);
-        task.put("assigned_to_name",uid);
-        task.put("title",title);
-        task.put("description",description);
-        task.put("due_date",date);
-        task.put("priority",priority);
-        task.put("created_by_uid",getshared.getString("uid",fAuth.getCurrentUser().getUid()));
-        task.put("created_by_name",getshared.getString("name","Not Available"));
-        task.put("status","Waiting acceptance");
-        task.put("task_id",TaskID);
-        task.put("description_work","");
-        task.put("image",""+flag);
+        final Map<String, Object> task = new HashMap<>();
+        task.put("assigned_to", uid);
+        task.put("assigned_to_name", uid);
+        task.put("title", title);
+        task.put("description", description);
+        task.put("due_date", date);
+        task.put("priority", priority);
+        task.put("created_by_uid", getshared.getString("uid", fAuth.getCurrentUser().getUid()));
+        task.put("created_by_name", getshared.getString("name", "Not Available"));
+        task.put("status", "Waiting acceptance");
+        task.put("task_id", TaskID);
+        task.put("description_work", "");
+        task.put("image", "" + flag);
         task.put("timestamp_1", Timestamp.now());
         java.util.Date c = Calendar.getInstance().getTime();
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         String formattedDate = df.format(c);
-        task.put("create_date",formattedDate);
+        task.put("create_date", formattedDate);
 
-        addnewtask(task,TaskID);
+        addnewtask(task, TaskID);
 
     }
 
@@ -221,9 +234,9 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(getContext(), "Task Created Successfully", Toast.LENGTH_SHORT).show();
-                notificationHelper.sendNotificationTune1(task.get("assigned_to").toString(),"New Task Added: \n" + task.get("title").toString()+" by "+task.get("created_by_name"));
+                notificationHelper.sendNotificationTune1(task.get("assigned_to").toString(), "New Task Added: \n" + task.get("title").toString() + " by " + task.get("created_by_name"));
                 startActivity(new Intent(getContext(), MainActivity.class));
-                if (flag!=0)
+                if (flag != 0)
                     uploadpicture(taskid);
                 getActivity().finish();
             }
@@ -236,7 +249,7 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
         });
     }
 
-    private void sendNotification(final String uid, final String title){
+    private void sendNotification(final String uid, final String title) {
 
         Toast.makeText(getContext(), "Current Recipients is : user1@gmail.com ( Just For Demo )", Toast.LENGTH_SHORT).show();
 
@@ -277,8 +290,8 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
                                 + "\"filters\": [{\"field\": \"tag\", \"key\": \"id\", \"relation\": \"=\", \"value\": \"" + send_email + "\"}],"
 
                                 + "\"data\": {\"foo\": \"bar\"},"
-                                + "\"contents\": {\"en\": \"New Task Added\n"+title+"\"},"
-                                +"\"small_icon\":\"task_master_icon\""
+                                + "\"contents\": {\"en\": \"New Task Added\n" + title + "\"},"
+                                + "\"small_icon\":\"task_master_icon\""
                                 + "}";
 
 
@@ -320,12 +333,11 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
     }
 
 
-
     private void getuserdata() {
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 //        mPrefs = getActivity().getPreferences(MODE_PRIVATE);
-        final SharedPreferences sharedPreferences = getActivity().getSharedPreferences("USER",MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = getActivity().getSharedPreferences("USER", MODE_PRIVATE);
 //
 //
 //        Gson gson = new Gson();
@@ -349,12 +361,12 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String tempName,tempUid;
-                        for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
+                        String tempName, tempUid;
+                        for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                             tempName = documentSnapshot.getString("name");
                             tempUid = documentSnapshot.getString("id");
-                            Assign_name.add(new Name_ModelClass(tempName,tempUid));
-                            name_adapter_recyclerView adapter = new name_adapter_recyclerView(getContext(),Assign_name,addTaskGenerator);
+                            Assign_name.add(new Name_ModelClass(tempName, tempUid));
+                            name_adapter_recyclerView adapter = new name_adapter_recyclerView(getContext(), Assign_name, addTaskGenerator);
                             recyclerView.setAdapter(adapter);
                             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
                         }
@@ -377,7 +389,7 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null){
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             imageuri = data.getData();
             Picasso.get().load(imageuri)
                     .fit()
@@ -393,25 +405,30 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
 //        pd.setTitle("Uplading image ...");
 //        pd.show();
 
-        final StorageReference riversRef = storageReference.child("document/*"+task_id);
+        final StorageReference riversRef = storageReference.child("document/*" + task_id);
 
         riversRef.putFile(imageuri)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                .continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
                     @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        try {
-                            Task<Uri> urlTask = taskSnapshot.getStorage().getDownloadUrl();
-                            while (!urlTask.isSuccessful());
-                            Uri downloadUrl = urlTask.getResult();
-                            Log.d("image",downloadUrl+"5");
-//                            Toast.makeText(getContext(), "Image Added to task", Toast.LENGTH_SHORT).show();
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
                         }
-//                        pd.dismiss();
-//                        finish();
-                        // Get a URL to the uploaded content
-//                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                        // Continue with the task to get the download URL
+                        return riversRef.getDownloadUrl();
+                    }
+                })
+                .addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            Uri downloadUri = task.getResult();
+                            Log.d("image", downloadUri+ "");
+                        } else {
+                            // Handle failures
+                            // ...
+                        }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -427,39 +444,65 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
                         // Handle unsuccessful uploads
                         // ...
                     }
-                }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
-                double progressPercentage = (100.0 *taskSnapshot.getBytesTransferred()/taskSnapshot.getTotalByteCount());
-
+                });
+//        .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+//            @Override
+//            public void onProgress(@NonNull UploadTask.TaskSnapshot taskSnapshot) {
+//                double progressPercentage = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+//
 //                pd.setMessage("Percentage: "+(int)progressPercentage+" %");
-            }
-        });
+//            }
+//        });
     }
 
     private String randgenerate() {
 
-            int i=0;
-            final String characters = "qwertyuiopasdfghjklzxcvbnm1234567890";
-            StringBuilder result = new StringBuilder();
-            while (i<20){
-                Random rand = new Random();
-                result.append(characters.charAt(rand.nextInt(characters.length())));
-                i++;
-            }
-            return result.toString();
+        int i = 0;
+        final String characters = "qwertyuiopasdfghjklzxcvbnm1234567890";
+        StringBuilder result = new StringBuilder();
+        while (i < 20) {
+            Random rand = new Random();
+            result.append(characters.charAt(rand.nextInt(characters.length())));
+            i++;
+        }
+        return result.toString();
     }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 //        Toast.makeText(getContext(), ""+i, Toast.LENGTH_SHORT).show();
-        if (i==0){
+        if (i == 0) {
             Priority = "Normal";
-        }
-        else {
+        } else {
             Priority = "High";
         }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS)
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission is granted
+                permissionCheck = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS);
+                Log.d("check_approve", permissionCheck + "");
+//                showUserDialog();
+            } else {
+                Toast.makeText(getContext(), "Until you grant the permission, we cannot display the users", Toast.LENGTH_SHORT).show();
+            }
+    }
+
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//                                           int[] grantResults) {
+//        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
+//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                 Permission is granted
+//            } else {
+//                Toast.makeText(this, "Until you grant the permission, we canot display the names", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//    }
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
@@ -468,21 +511,21 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
 
     @Override
     public void onDateSet(DatePicker datePicker, int i, int i1, int i2) {
-        Date = i2+"/"+(i1+1)+"/"+i;
+        Date = i2 + "/" + (i1 + 1) + "/" + i;
         select_date.setText(Date);
-        Log.d("Date is ",Date);
+        Log.d("Date is ", Date);
     }
 
     private void openFileChooser() {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent,PICK_IMAGE_REQUEST);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
 
     @Override
     public void sendInput(Add_task_generator add_task_generator) {
-        Log.d(TAG,"Found incoming input");
+        Log.d(TAG, "Found incoming input");
         this.addTaskGenerator = add_task_generator;
         select_user.setText(addTaskGenerator.getName());
     }

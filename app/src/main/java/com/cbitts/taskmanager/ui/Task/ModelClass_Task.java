@@ -36,6 +36,7 @@ public class ModelClass_Task implements Serializable {
 
     public void setImage(Uri image) {
         Image = image;
+        Log.d("image","Image is set as "+ image );
     }
 
     final String TAG = "ModelClass_task";

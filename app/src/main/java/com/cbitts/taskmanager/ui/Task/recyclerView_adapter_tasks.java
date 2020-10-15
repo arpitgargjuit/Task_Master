@@ -43,6 +43,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -98,43 +100,57 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
 //                e.printStackTrace();
 //            }
 //        }
-//        try {
-//            if (task_data.getFlag().equals("1")){
-//                itemViewHolder.Image_btn.setVisibility(View.VISIBLE);
-//                Log.d("adapter_task","flag is 1");
-//            }
-//            else {
-//                itemViewHolder.Image_btn.setVisibility(View.GONE);
-//                Log.d("adapter_task","flag is 0");
-//            }
-//            itemViewHolder.Image_btn.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    Dialog settingsDialog = new Dialog(context);
-//                    settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-//                    LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-//                    settingsDialog.setContentView(inflater.inflate(R.layout.dialog_image, null));
-//                    itemViewHolder.image = settingsDialog.findViewById(R.id.image_view);
+        try {
+            if (task_data.getFlag().equals("1")){
+                itemViewHolder.Image_btn.setVisibility(View.VISIBLE);
+                Log.d("adapter_task","flag is 1");
+            }
+            else {
+                itemViewHolder.Image_btn.setVisibility(View.GONE);
+                Log.d("adapter_task","flag is 0");
+            }
+            itemViewHolder.Image_btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Dialog settingsDialog = new Dialog(context);
+                    settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+                    LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+                    settingsDialog.setContentView(inflater.inflate(R.layout.dialog_image, null));
+                    itemViewHolder.image = settingsDialog.findViewById(R.id.image_view);
+//
+                    Log.d("image",task_data.getImage()+"");
+//                    StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("document/*"+task_data.getTaskId()+".jpg");
+//                    StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("https://firebasestorage.googleapis.com/v0/b/task-manager-2de28.appspot.com/o/document%2F*z8r2c34xxyfyoe03nhv8.jpg?alt=media&token=777b374c-75c5-48dc-86d1-411ee6b5f4c9");
+//                    StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("gs://task-manager-2de28.appspot.com/document/*3h440rk6r19b9ff42wo9.jpg");
 
-//                    Log.d("image",task_data.getImage()+"");
+//                    Glide.with(context)
+//                            .load(storageReference)// Here I am trying to retrieve Image
+//                            .into(itemViewHolder.image);
+
 //                    Picasso.get().load(task_data.getImage())
 //                            .fit()
 //                            .centerCrop()
 //                            .into(itemViewHolder.image);
 //                    settingsDialog.show();
 
-        //No Use
-//            final Dialog builder = new Dialog(context);
-//            builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
-//            builder.getWindow().setBackgroundDrawable(
-//                    new ColorDrawable(android.graphics.Color.TRANSPARENT));
-//            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-//                @Override
-//                public void onDismiss(DialogInterface dialogInterface) {
+//
+//        No Use
+            final Dialog builder = new Dialog(context);
+            builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            builder.getWindow().setBackgroundDrawable(
+                    new ColorDrawable(android.graphics.Color.TRANSPARENT));
+//                    Glide.with(context)
+//                            .asBitmap()
+//                            .load(task_data.getImage())
+//                            .into(itemViewHolder.image);
+//                    itemViewHolder.image.setImageResource(R.mipmap.ic_launcher);
+            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialogInterface) {
 //                    nothing;
-//                    builder.dismiss();
-//                }
-//            });
+                    builder.dismiss();
+                }
+            });
 //
 //            ImageView imageView = new ImageView(context);
 //            imageView.setImageURI(imageUri);
@@ -142,16 +158,16 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
 //                    ViewGroup.LayoutParams.MATCH_PARENT,
 //                    ViewGroup.LayoutParams.MATCH_PARENT));
 //            builder.show();
+//
+//        No use
+                }
+            });
+//
 
-        //No use
-//                }
-//            });
-
-
-//                } catch (Exception e) {
-//            e.printStackTrace();
-//            Log.d("adapter_task","exception: "+e.toString());
-//        }
+                } catch (Exception e) {
+            e.printStackTrace();
+            Log.d("adapter_task","exception: "+e.toString());
+        }
 
         if (!task_data.getCreated_id().equals(uid)) {
             try {

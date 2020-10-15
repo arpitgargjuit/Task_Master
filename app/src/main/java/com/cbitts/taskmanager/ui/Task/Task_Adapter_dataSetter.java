@@ -177,9 +177,11 @@ public class Task_Adapter_dataSetter {
                             temp_flag = documentSnapshot.getString("image");
                             Log.d("adapter",temp_flag);
 
-                            if (temp_flag.equals("1")){
-
-
+                            if (!temp_status.equals("Completed")&&(!temp_status.startsWith("Deleted"))&&(!temp_status.startsWith("Rejected by"))){
+                                Log.d("taskSetter",temp_work_description+"size is "+task_list.size());
+                            final ModelClass_Task modelClass_task = new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid,uid,name,temp_creatorid,temp_creatorname,temp_work_description,temp_flag, temp_createDate);
+                            task_list.add(modelClass_task);
+                            if (temp_flag.equals("1")) {
 
                                 FirebaseStorage.getInstance().getReference().child("document/*"+temp_taskid).getDownloadUrl()
                                         .addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -188,7 +190,8 @@ public class Task_Adapter_dataSetter {
 
 
                                                 temp_imageUri = uri;
-                                                Log.d("image",uri+"");
+                                                Log.d("image_get",uri+"");
+                                                modelClass_task.setImage(temp_imageUri);
 
                                                 //todo store the retrieved image in object ang pass to modelclass.setimage
 
@@ -196,16 +199,9 @@ public class Task_Adapter_dataSetter {
                                         }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        Log.d("image",e.getMessage());
+                                        Log.d("image_error",e.getMessage());
                                     }
                                 });
-                            }
-                            if (!temp_status.equals("Completed")&&(!temp_status.startsWith("Deleted"))&&(!temp_status.startsWith("Rejected by"))){
-                                Log.d("taskSetter",temp_work_description+"size is "+task_list.size());
-                            ModelClass_Task modelClass_task = new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid,uid,name,temp_creatorid,temp_creatorname,temp_work_description,temp_flag, temp_createDate);
-                            task_list.add(modelClass_task);
-                            if (temp_flag.equals("1")) {
-                                modelClass_task.setImage(temp_imageUri);
                             }
                             }
 
