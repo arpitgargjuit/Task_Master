@@ -191,7 +191,7 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
                 startActivity(new Intent(getContext(), MainActivity.class));
                 getActivity().finish();
                 NotificationHelper notificationHelper = new NotificationHelper();
-                notificationHelper.sendNotificationTune2(task.get("assigned_to").toString(),"Task edited by: \n"+task.get("created_by_name"));
+                notificationHelper.sendNotificationTune2(task.get("assigned_to").toString(),task.get("title") + "\nEdited by: \n"+task.get("created_by_name"));
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

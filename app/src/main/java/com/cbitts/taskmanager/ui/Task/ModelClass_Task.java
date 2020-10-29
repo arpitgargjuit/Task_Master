@@ -97,6 +97,21 @@ public class ModelClass_Task implements Serializable {
         Log.d(TAG, "Value of description is " + Description_work);
     }
 
+    public ModelClass_Task(String title, String description, String date, String priority, String status, String taskId, String created_id, String created_name, String description_work, String flag, String createDate) {
+        Title = title;
+        Description = description;
+        Date = date;
+        Priority = priority;
+        Status = status;
+        TaskId = taskId;
+        Created_id = created_id;
+        Created_name = created_name;
+        Description_work = description_work;
+        this.createDate = createDate;
+        this.flag = flag;
+        Log.d(TAG, "Value of description is " + Description_work);
+    }
+
     public void setTitle(String title) {
         Title = title;
     }

@@ -23,6 +23,14 @@ public class CustomObject {
         this.filter = filter;
     }
 
+    public CustomObject(RecyclerView recyclerView, Context context, Activity activity, TextView loading, int holder_edit) {
+        this.recyclerView = recyclerView;
+        this.context = context;
+        this.activity = activity;
+        this.loading = loading;
+        this.holder_edit = holder_edit;
+    }
+
     public RecyclerView getRecyclerView() {
         return recyclerView;
     }

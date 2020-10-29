@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cbitts.taskmanager.R;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -150,7 +151,7 @@ public class Custondialog_userSelect extends DialogFragment {
 
 
         final String curr_uid = sharedPreferences.getString("uid", null);
-        firebaseFirestore.collection("users").get()
+        firebaseFirestore.collection("users").orderBy("name").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -182,6 +183,13 @@ public class Custondialog_userSelect extends DialogFragment {
 
 
                     }
-                });
+                })
+        .addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(getContext(), "Failed to load users", Toast.LENGTH_SHORT).show();
+                Log.d("error",e.toString());
+            }
+        });
     }
 }

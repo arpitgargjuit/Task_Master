@@ -1,6 +1,7 @@
 package com.cbitts.taskmanager.ui.Task;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -10,13 +11,16 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -27,8 +31,14 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class Task_Adapter_dataSetter {
     RecyclerView recyclerView;
@@ -112,26 +122,88 @@ public class Task_Adapter_dataSetter {
                             temp_taskid = documentSnapshot.getString("task_id");
                             temp_work_description = documentSnapshot.getString("description_work");
                             temp_flag = documentSnapshot.getString("image");
-                            if (temp_flag.equals("1")){
-                                FirebaseStorage.getInstance().getReference().child("document/*"+temp_taskid).getDownloadUrl()
-                                        .addOnSuccessListener(new OnSuccessListener<Uri>() {
+
+                            Calendar calendar =  Calendar.getInstance();
+                            java.util.Date c = calendar.getTime();
+                            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                            try {
+                                Date due = df.parse(temp_date);
+                                calendar.setTime(due);
+                                calendar.add(Calendar.DATE,1);
+                                due = calendar.getTime();
+                                if (due.after(c)){
+                                    Log.d("check","pending");
+                                    if (temp_status.equals("Overdue")){
+                                        temp_status = "pending";
+                                        HashMap<String, Object> over = new HashMap<>();
+                                        over.put("status",temp_status);
+                                        firebaseFirestore.collection("tasks").document(temp_taskid).update(over).addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
-                                            public void onSuccess(Uri uri) {
-
-                                                temp_imageUri = uri;
-
-                                                //todo store the retrieved image in object ang pass to modelclass.setimage
-
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Log.d("status","Staus updated to overdue");
                                             }
                                         });
+                                    }
+                                }
+                                else {
+                                    Log.d("check","overdue");
+                                    if (temp_status.equals("pending")) {
+                                        temp_status = "Overdue";
+                                        HashMap<String, Object> over = new HashMap<>();
+                                        over.put("status", temp_status);
+                                        firebaseFirestore.collection("tasks").document(temp_taskid).update(over).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Log.d("status", "Staus updated to overdue");
+                                            }
+                                        });
+                                    }
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                                Log.d("error_overdue",e.getMessage());
                             }
+
+
+//                            if (temp_flag.equals("1")){
+//                                FirebaseStorage.getInstance().getReference().child("document/*"+temp_taskid).getDownloadUrl()
+//                                        .addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                                            @Override
+//                                            public void onSuccess(Uri uri) {
+//
+//                                                temp_imageUri = uri;
+//
+//                                                //todo store the retrieved image in object ang pass to modelclass.setimage
+//
+//                                            }
+//                                        });
+//                            }
 
                             if (!temp_status.equals("Completed")&&!temp_status.startsWith("Deleted")&&(!temp_status.startsWith("Rejected by"))) {
                                 Log.d("taskSetter",temp_work_description+"size is "+task_list.size());
-                                ModelClass_Task modelClass_task = new ModelClass_Task(temp_title, temp_description, temp_date, temp_priority, temp_status, temp_taskid, temp_assignid, temp_assignname, uid, name, temp_work_description, temp_flag, temp_createDate);
+                                final ModelClass_Task modelClass_task = new ModelClass_Task(temp_title, temp_description, temp_date, temp_priority, temp_status, temp_taskid, temp_assignid, temp_assignname, uid, name, temp_work_description, temp_flag, temp_createDate);
                                 task_list.add(modelClass_task);
-                                if (temp_flag.equals("1")){
-                                    modelClass_task.setImage(temp_imageUri);
+                                if (temp_flag.equals("1")) {
+
+                                    FirebaseStorage.getInstance().getReference().child("document/*"+temp_taskid).getDownloadUrl()
+                                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+
+
+                                                    temp_imageUri = uri;
+                                                    Log.d("image_get",uri+"");
+                                                    modelClass_task.setImage(temp_imageUri);
+
+                                                    //todo store the retrieved image in object ang pass to modelclass.setimage
+
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.d("image_error",e.getMessage());
+                                        }
+                                    });
                                 }
                             }
                         }
@@ -176,6 +248,47 @@ public class Task_Adapter_dataSetter {
                             temp_work_description = documentSnapshot.getString("description_work");
                             temp_flag = documentSnapshot.getString("image");
                             Log.d("adapter",temp_flag);
+
+                            Calendar calendar =  Calendar.getInstance();
+                            java.util.Date c = calendar.getTime();
+                            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                            try {
+                                Date due = df.parse(temp_date);
+                                calendar.setTime(due);
+                                calendar.add(Calendar.DATE,1);
+                                due = calendar.getTime();
+                                if (due.after(c)){
+                                    Log.d("check","pending");
+                                    if (temp_status.equals("Overdue")){
+                                        temp_status = "pending";
+                                        HashMap<String, Object> over = new HashMap<>();
+                                        over.put("status",temp_status);
+                                        firebaseFirestore.collection("tasks").document(temp_taskid).update(over).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Log.d("status","Staus updated to overdue");
+                                            }
+                                        });
+                                    }
+                                }
+                                else {
+                                    Log.d("check","overdue");
+                                    if (temp_status.equals("pending")) {
+                                        temp_status = "Overdue";
+                                        HashMap<String, Object> over = new HashMap<>();
+                                        over.put("status", temp_status);
+                                        firebaseFirestore.collection("tasks").document(temp_taskid).update(over).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Log.d("status", "Staus updated to overdue");
+                                            }
+                                        });
+                                    }
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                                Log.d("error_overdue",e.getMessage());
+                            }
 
                             if (!temp_status.equals("Completed")&&(!temp_status.startsWith("Deleted"))&&(!temp_status.startsWith("Rejected by"))){
                                 Log.d("taskSetter",temp_work_description+"size is "+task_list.size());

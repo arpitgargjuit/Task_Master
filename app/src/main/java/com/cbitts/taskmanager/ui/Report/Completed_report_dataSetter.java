@@ -3,6 +3,7 @@ package com.cbitts.taskmanager.ui.Report;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ public class Completed_report_dataSetter {
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     int holder_edit, filter;
     CustomObject object;
+    Uri temp_imageUri;
 
     public Completed_report_dataSetter(Context context, RecyclerView recyclerView, Activity activity, TextView loading, int holder_edit, int filter) {
         this.recyclerView = recyclerView;
@@ -95,7 +98,7 @@ public class Completed_report_dataSetter {
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String temp_title, temp_description, temp_date, temp_priority, temp_assignid, temp_assignname, temp_status, temp_taskid, temp_work_description, temp_createDate;
+                        String temp_title, temp_description, temp_date, temp_priority, temp_assignid, temp_assignname, temp_status, temp_taskid, temp_work_description, temp_createDate, temp_flag;
                         for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
                             temp_title = documentSnapshot.getString("title");
                             temp_description = documentSnapshot.getString("description");
@@ -106,9 +109,34 @@ public class Completed_report_dataSetter {
                             temp_assignname = documentSnapshot.getString("assigned_to_name");
                             temp_status = documentSnapshot.getString("status");
                             temp_taskid = documentSnapshot.getString("task_id");
+                            temp_flag = documentSnapshot.getString("image");
                             temp_work_description = documentSnapshot.getString("description_work");
-                            if ((temp_status.startsWith("Deleted by")||temp_status.startsWith("Rejected by")||temp_status.equals("Completed")))
-                                task_list.add(new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid, temp_assignid,temp_assignname,uid,name, temp_work_description,"0", temp_createDate));
+                            if ((temp_status.startsWith("Deleted by")||temp_status.startsWith("Rejected by")||temp_status.equals("Completed"))) {
+                                final ModelClass_Task modelClass_task = new ModelClass_Task(temp_title, temp_description, temp_date, temp_priority, temp_status, temp_taskid, temp_assignid, temp_assignname, uid, name, temp_work_description, temp_flag, temp_createDate);
+                                task_list.add(modelClass_task);
+                                if (temp_flag.equals("1")) {
+
+                                    FirebaseStorage.getInstance().getReference().child("document/*" + temp_taskid).getDownloadUrl()
+                                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+
+
+                                                    temp_imageUri = uri;
+                                                    Log.d("image_get", uri + "");
+                                                    modelClass_task.setImage(temp_imageUri);
+
+                                                    //todo store the retrieved image in object ang pass to modelclass.setimage
+
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.d("image_error", e.getMessage());
+                                        }
+                                    });
+                                }
+                            }
                         }
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
                         recyclerView.setLayoutManager(layoutManager);
@@ -136,8 +164,8 @@ public class Completed_report_dataSetter {
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String temp_title, temp_description, temp_date, temp_priority, temp_creatorid, temp_creatorname, temp_status, temp_taskid, temp_work_description, temp_createDate;
-                        for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
+                        String temp_title, temp_description, temp_date, temp_priority, temp_creatorid, temp_creatorname, temp_status, temp_taskid, temp_work_description, temp_createDate, temp_flag;
+                        for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                             temp_title = documentSnapshot.getString("title");
                             temp_description = documentSnapshot.getString("description");
                             temp_date = documentSnapshot.getString("due_date");
@@ -147,9 +175,34 @@ public class Completed_report_dataSetter {
                             temp_creatorname = documentSnapshot.getString("created_by_name");
                             temp_status = documentSnapshot.getString("status");
                             temp_taskid = documentSnapshot.getString("task_id");
+                            temp_flag = documentSnapshot.getString("image");
                             temp_work_description = documentSnapshot.getString("description_work");
-                            if ((temp_status.startsWith("Deleted by")||temp_status.startsWith("Rejected by")||temp_status.equals("Completed")))
-                                task_list.add(new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid,uid,name,temp_creatorid,temp_creatorname, temp_work_description,"0", temp_createDate));
+                            if ((temp_status.startsWith("Deleted by") || temp_status.startsWith("Rejected by") || temp_status.equals("Completed"))) {
+                                final ModelClass_Task modelClass_task = new ModelClass_Task(temp_title, temp_description, temp_date, temp_priority, temp_status, temp_taskid, uid, name, temp_creatorid, temp_creatorname, temp_work_description, temp_flag, temp_createDate);
+                                task_list.add(modelClass_task);
+                                if (temp_flag.equals("1")) {
+
+                                    FirebaseStorage.getInstance().getReference().child("document/*" + temp_taskid).getDownloadUrl()
+                                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+
+
+                                                    temp_imageUri = uri;
+                                                    Log.d("image_get", uri + "");
+                                                    modelClass_task.setImage(temp_imageUri);
+
+                                                    //todo store the retrieved image in object ang pass to modelclass.setimage
+
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.d("image_error", e.getMessage());
+                                        }
+                                    });
+                                }
+                            }
                         }
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
                         recyclerView.setLayoutManager(layoutManager);

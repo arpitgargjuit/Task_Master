@@ -355,6 +355,9 @@ public class HomeFragment extends Fragment {
                             else  if (temp.equals("Completed")){
                                 compl++;
                             }
+                            else if (temp.equals("Overdue")){
+                                over++;
+                            }
                         }
                         firebaseFirestore.collection("tasks").whereEqualTo("created_by_uid",uid).get()
                                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -371,6 +374,9 @@ public class HomeFragment extends Fragment {
                                             }
                                             else  if (temp.equals("Completed")){
                                                 compl++;
+                                            }
+                                            else if (temp.equals("Overdue")){
+                                                over++;
                                             }
                                         }
                                         pending.setText(""+pend);
@@ -431,6 +437,9 @@ public class HomeFragment extends Fragment {
                             else  if (temp.equals("Completed")){
                                 compl++;
                             }
+                            else if (temp.equals("Overdue")){
+                                over++;
+                            }
                         }
                         pending.setText(""+pend);
                         completed.setText(""+compl);
@@ -481,6 +490,9 @@ public class HomeFragment extends Fragment {
                             }
                             else  if (temp.equals("Completed")){
                                 compl++;
+                            }
+                            else if (temp.equals("Overdue")){
+                                over++;
                             }
                         }
                         pending.setText(""+pend);

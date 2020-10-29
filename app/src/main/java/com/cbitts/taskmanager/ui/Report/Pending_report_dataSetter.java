@@ -3,6 +3,7 @@ package com.cbitts.taskmanager.ui.Report;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -15,8 +16,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.cbitts.taskmanager.ui.Task.CustomObject;
 import com.cbitts.taskmanager.ui.Task.ModelClass_Task;
 import com.cbitts.taskmanager.ui.Task.recyclerView_adapter_tasks;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -24,9 +27,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class Pending_report_dataSetter {
 
@@ -41,6 +51,7 @@ public class Pending_report_dataSetter {
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     int holder_edit, filter;
     CustomObject object;
+    Uri temp_imageUri;
 
     public Pending_report_dataSetter(Context context, RecyclerView recyclerView, Activity activity, TextView loading, int holder_edit, int filter) {
         this.recyclerView = recyclerView;
@@ -96,7 +107,7 @@ public class Pending_report_dataSetter {
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String temp_title, temp_description, temp_date, temp_priority, temp_assignid, temp_assignname, temp_status, temp_taskid, temp_work_description, temp_createDate;
+                        String temp_title, temp_description, temp_date, temp_priority, temp_assignid, temp_assignname, temp_status, temp_taskid, temp_work_description, temp_createDate, temp_flag;
                         for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
                             temp_title = documentSnapshot.getString("title");
                             temp_description = documentSnapshot.getString("description");
@@ -107,9 +118,76 @@ public class Pending_report_dataSetter {
                             temp_assignname = documentSnapshot.getString("assigned_to_name");
                             temp_status = documentSnapshot.getString("status");
                             temp_taskid = documentSnapshot.getString("task_id");
+                            temp_flag = documentSnapshot.getString("image");
                             temp_work_description = documentSnapshot.getString("description_work");
-                            if (!temp_status.equals("Completed")&&!temp_status.equals("Waiting confirmation")&&!temp_status.startsWith("Deleted by")&&!temp_status.startsWith("Rejected by"))
-                                task_list.add(new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid, temp_assignid,temp_assignname,uid,name, temp_work_description,"0", temp_createDate));
+
+                            Calendar calendar =  Calendar.getInstance();
+                            java.util.Date c = calendar.getTime();
+                            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                            try {
+                                Date due = df.parse(temp_date);
+                                calendar.setTime(due);
+                                calendar.add(Calendar.DATE,1);
+                                due = calendar.getTime();
+                                if (due.after(c)){
+                                    Log.d("check","pending");
+                                    if (temp_status.equals("Overdue")){
+                                        temp_status = "pending";
+                                        HashMap<String, Object> over = new HashMap<>();
+                                        over.put("status",temp_status);
+                                        firebaseFirestore.collection("tasks").document(temp_taskid).update(over).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Log.d("status","Staus updated to overdue");
+                                            }
+                                        });
+                                    }
+                                }
+                                else {
+                                    Log.d("check","overdue");
+                                    if (temp_status.equals("pending")) {
+                                        temp_status = "Overdue";
+                                        HashMap<String, Object> over = new HashMap<>();
+                                        over.put("status", temp_status);
+                                        firebaseFirestore.collection("tasks").document(temp_taskid).update(over).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Log.d("status", "Staus updated to overdue");
+                                            }
+                                        });
+                                    }
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                                Log.d("error_overdue",e.getMessage());
+                            }
+
+                            if (!temp_status.equals("Completed")&&!temp_status.equals("Waiting confirmation")&&!temp_status.startsWith("Deleted by")&&!temp_status.startsWith("Rejected by")){
+                                final ModelClass_Task modelClass_task = new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid, temp_assignid,temp_assignname,uid,name, temp_work_description,temp_flag, temp_createDate);
+                                task_list.add(modelClass_task);
+                                if (temp_flag.equals("1")) {
+
+                                    FirebaseStorage.getInstance().getReference().child("document/*" + temp_taskid).getDownloadUrl()
+                                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+
+
+                                                    temp_imageUri = uri;
+                                                    Log.d("image_get", uri + "");
+                                                    modelClass_task.setImage(temp_imageUri);
+
+                                                    //todo store the retrieved image in object ang pass to modelclass.setimage
+
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.d("image_error", e.getMessage());
+                                        }
+                                    });
+                                }
+                            }
                         }
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
                         recyclerView.setLayoutManager(layoutManager);
@@ -137,7 +215,7 @@ public class Pending_report_dataSetter {
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        String temp_title, temp_description, temp_date, temp_priority, temp_creatorid, temp_creatorname, temp_status, temp_taskid, temp_work_description, temp_createDate;
+                        String temp_title, temp_description, temp_date, temp_priority, temp_creatorid, temp_creatorname, temp_status, temp_taskid, temp_work_description, temp_createDate, temp_flag;
                         for(QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots){
                             temp_title = documentSnapshot.getString("title");
                             temp_description = documentSnapshot.getString("description");
@@ -148,9 +226,77 @@ public class Pending_report_dataSetter {
                             temp_creatorname = documentSnapshot.getString("created_by_name");
                             temp_status = documentSnapshot.getString("status");
                             temp_taskid = documentSnapshot.getString("task_id");
+                            temp_flag = documentSnapshot.getString("image");
                             temp_work_description = documentSnapshot.getString("description_work");
-                            if (!temp_status.equals("Completed")&&!temp_status.equals("Waiting confirmation")&&!temp_status.startsWith("Deleted by")&&!temp_status.startsWith("Rejected by"))
-                                task_list.add(new ModelClass_Task(temp_title,temp_description,temp_date,temp_priority,temp_status,temp_taskid,uid,name,temp_creatorid,temp_creatorname, temp_work_description,"0", temp_createDate));
+
+                            Calendar calendar =  Calendar.getInstance();
+                            java.util.Date c = calendar.getTime();
+                            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                            try {
+                                Date due = df.parse(temp_date);
+                                calendar.setTime(due);
+                                calendar.add(Calendar.DATE,1);
+                                due = calendar.getTime();
+                                if (due.after(c)){
+                                    Log.d("check","pending");
+                                    if (temp_status.equals("Overdue")){
+                                        temp_status = "pending";
+                                        HashMap<String, Object> over = new HashMap<>();
+                                        over.put("status",temp_status);
+                                        firebaseFirestore.collection("tasks").document(temp_taskid).update(over).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Log.d("status","Staus updated to overdue");
+                                            }
+                                        });
+                                    }
+                                }
+                                else {
+                                    Log.d("check","overdue");
+                                    if (temp_status.equals("pending")) {
+                                        temp_status = "Overdue";
+                                        HashMap<String, Object> over = new HashMap<>();
+                                        over.put("status", temp_status);
+                                        firebaseFirestore.collection("tasks").document(temp_taskid).update(over).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                Log.d("status", "Staus updated to overdue");
+                                            }
+                                        });
+                                    }
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                                Log.d("error_overdue",e.getMessage());
+                            }
+
+                            if (!temp_status.equals("Completed")&&!temp_status.equals("Waiting confirmation")&&!temp_status.startsWith("Deleted by")&&!temp_status.startsWith("Rejected by")) {
+                                final ModelClass_Task modelClass_task = new ModelClass_Task(temp_title, temp_description, temp_date, temp_priority, temp_status, temp_taskid, uid, name, temp_creatorid, temp_creatorname, temp_work_description, temp_flag, temp_createDate);
+
+                                task_list.add(modelClass_task);
+                                if (temp_flag.equals("1")) {
+
+                                    FirebaseStorage.getInstance().getReference().child("document/*" + temp_taskid).getDownloadUrl()
+                                            .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                @Override
+                                                public void onSuccess(Uri uri) {
+
+
+                                                    temp_imageUri = uri;
+                                                    Log.d("image_get", uri + "");
+                                                    modelClass_task.setImage(temp_imageUri);
+
+                                                    //todo store the retrieved image in object ang pass to modelclass.setimage
+
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.d("image_error", e.getMessage());
+                                        }
+                                    });
+                                }
+                            }
                         }
                         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
                         recyclerView.setLayoutManager(layoutManager);

@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -101,54 +102,52 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
 //            }
 //        }
         try {
-            if (task_data.getFlag().equals("1")){
+            if (task_data.getFlag().equals("1")) {
                 itemViewHolder.Image_btn.setVisibility(View.VISIBLE);
-                Log.d("adapter_task","flag is 1");
-            }
-            else {
+                Log.d("adapter_task", "flag is 1");
+            } else {
                 itemViewHolder.Image_btn.setVisibility(View.GONE);
-                Log.d("adapter_task","flag is 0");
+                Log.d("adapter_task", "flag is 0");
             }
             itemViewHolder.Image_btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Dialog settingsDialog = new Dialog(context);
-                    settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-                    LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-                    settingsDialog.setContentView(inflater.inflate(R.layout.dialog_image, null));
-                    itemViewHolder.image = settingsDialog.findViewById(R.id.image_view);
-//
-                    Log.d("image",task_data.getImage()+"");
-//                    StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("document/*"+task_data.getTaskId()+".jpg");
-//                    StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("https://firebasestorage.googleapis.com/v0/b/task-manager-2de28.appspot.com/o/document%2F*z8r2c34xxyfyoe03nhv8.jpg?alt=media&token=777b374c-75c5-48dc-86d1-411ee6b5f4c9");
-//                    StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("gs://task-manager-2de28.appspot.com/document/*3h440rk6r19b9ff42wo9.jpg");
 
-//                    Glide.with(context)
-//                            .load(storageReference)// Here I am trying to retrieve Image
-//                            .into(itemViewHolder.image);
+                    if (itemViewHolder.image_open){
+                        itemViewHolder.image.setVisibility(View.GONE);
+                        itemViewHolder.Image_btn.setText("Click to see image");
+                        itemViewHolder.image_open = false;
+                    }
+                    else {
+//                    Dialog settingsDialog = new Dialog(context);
+//                    settingsDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+//                    LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+//                    settingsDialog.setContentView(inflater.inflate(R.layout.dialog_image, null));
+//                    itemViewHolder.image = settingsDialog.findViewById(R.id.image_view);
 
-//                    Picasso.get().load(task_data.getImage())
-//                            .fit()
-//                            .centerCrop()
-//                            .into(itemViewHolder.image);
+//                        Log.d("image", task_data.getImage() + "");
 //                    settingsDialog.show();
+                        itemViewHolder.image.setVisibility(View.VISIBLE);
+                        itemViewHolder.Image_btn.setText("Hide image");
+                        Glide.with(context)
+                                .asBitmap()
+                                .load(task_data.getImage())
+                                .into(itemViewHolder.image);
+                        itemViewHolder.image_open = true;
+                    }
 
 //
 //        No Use
-            final Dialog builder = new Dialog(context);
-            builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            builder.getWindow().setBackgroundDrawable(
-                    new ColorDrawable(android.graphics.Color.TRANSPARENT));
-//                    Glide.with(context)
-//                            .asBitmap()
-//                            .load(task_data.getImage())
-//                            .into(itemViewHolder.image);
-//                    itemViewHolder.image.setImageResource(R.mipmap.ic_launcher);
-            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialogInterface) {
+//            final Dialog builder = new Dialog(context);
+//            builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//            builder.getWindow().setBackgroundDrawable(
+//                    new ColorDrawable(android.graphics.Color.TRANSPARENT));
+//
+//            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+//                @Override
+//                public void onDismiss(DialogInterface dialogInterface) {
 //                    nothing;
-                    builder.dismiss();
+//                    builder.dismiss();
                 }
             });
 //
@@ -160,18 +159,18 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
 //            builder.show();
 //
 //        No use
-                }
-            });
+//                }
+//            });
 //
 
-                } catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            Log.d("adapter_task","exception: "+e.toString());
+            Log.d("adapter_task", "exception: " + e.toString());
         }
 
         if (!task_data.getCreated_id().equals(uid)) {
             try {
-                Log.d("Test","inside first first");
+                Log.d("Test", "inside first first");
                 itemViewHolder.title.setText(task_data.getTitle());
                 itemViewHolder.description.setText(task_data.getDescription());
                 itemViewHolder.date.setText(task_data.getDate());
@@ -182,31 +181,34 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                 itemViewHolder.create_date.setText(task_data.getCreateDate());
                 String status = task_data.getStatus();
                 itemViewHolder.status.setText(status);
-                if (!TextUtils.isEmpty(task_data.getDescription_work())){
+
+                if(status.equals("Overdue")){
+                    itemViewHolder.status.setTextColor(Color.RED);
+                }
+
+                if (!TextUtils.isEmpty(task_data.getDescription_work())) {
                     itemViewHolder.work_description.setVisibility(View.VISIBLE);
                     itemViewHolder.work_description.setText(task_data.getDescription_work());
-                    Log.d(TAG,"Value of work description are: "+task_data.getDescription_work());
+                    Log.d(TAG, "Value of work description are: " + task_data.getDescription_work());
                 }
                 if (status.equals("Waiting acceptance")) {
                     itemViewHolder.accept_reject.setVisibility(View.VISIBLE);
                     itemViewHolder.Complete.setVisibility(View.GONE);
                     itemViewHolder.accept.setClickable(true);
                     itemViewHolder.reject.setClickable(true);
-                } else if (status.equals("pending") || status.equals("overdue")||status.startsWith("Rejected work")) {
+                } else if (status.equals("pending") || status.equals("Overdue") || status.startsWith("Rejected work")) {
                     itemViewHolder.accept.setClickable(true);
                     itemViewHolder.editText_work_description.setFocusable(true);
                     itemViewHolder.editText_work_description.setCursorVisible(true);
                     itemViewHolder.accept_reject.setVisibility(View.GONE);
                     itemViewHolder.Complete.setVisibility(View.VISIBLE);
                     itemViewHolder.editText_work_description.setVisibility(View.VISIBLE);
-                }
-                else if (status.equals("Completed")){
+                } else if (status.equals("Completed")) {
                     itemViewHolder.accept_reject.setVisibility(View.GONE);
                     itemViewHolder.admin_btn.setVisibility(View.GONE);
                     itemViewHolder.status.setTextColor(Color.GREEN);
                     itemViewHolder.delete_completed.setVisibility(View.VISIBLE);
-                }
-                else if (status.startsWith("Deleted by")||status.startsWith("Rejected by")){
+                } else if (status.startsWith("Deleted by") || status.startsWith("Rejected by")) {
                     itemViewHolder.delete_completed.setVisibility(View.VISIBLE);
                     itemViewHolder.admin_btn.setVisibility(View.GONE);
                     itemViewHolder.accept_reject.setVisibility(View.GONE);
@@ -216,11 +218,10 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                     @Override
                     public void onClick(View view) {
                         String desc = itemViewHolder.editText_work_description.getText().toString();
-                        if (TextUtils.isEmpty(desc)){
+                        if (TextUtils.isEmpty(desc)) {
                             itemViewHolder.editText_work_description.setError("description the work is required");
-                        }
-                        else {
-                            String Name = getshared.getString("name",null);
+                        } else {
+                            String Name = getshared.getString("name", null);
                             itemViewHolder.editText_work_description.setFocusable(false);
                             itemViewHolder.editText_work_description.setCursorVisible(false);
                             itemViewHolder.accept.setClickable(false);
@@ -256,7 +257,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                 Log.d("Exception", e.toString());
             }
         } else {
-            Log.d("Data_got",task_data.getTitle());
+            Log.d("Data_got", task_data.getTitle());
             final String name = getshared.getString("name", null);
             itemViewHolder.title.setText(task_data.getTitle());
             itemViewHolder.description.setText(task_data.getDescription());
@@ -265,13 +266,18 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             itemViewHolder.create_date.setText(task_data.getCreateDate());
             String status = task_data.getStatus();
             itemViewHolder.status.setText(status);
+
+            if(status.equals("Overdue")){
+                itemViewHolder.status.setTextColor(Color.RED);
+            }
+
             itemViewHolder.task_to.setVisibility(View.VISIBLE);
             itemViewHolder.task_by.setVisibility(View.GONE);
-            Log.d("status_error",status);
-            if (!TextUtils.isEmpty(task_data.getDescription_work())){
+            Log.d("status_error", status);
+            if (!TextUtils.isEmpty(task_data.getDescription_work())) {
                 itemViewHolder.work_description.setVisibility(View.VISIBLE);
                 itemViewHolder.work_description.setText(task_data.getDescription_work());
-                Log.d(TAG,"Value of work description are: "+task_data.getDescription_work());
+                Log.d(TAG, "Value of work description are: " + task_data.getDescription_work());
             }
             if (task_data.getAssigned_id().equals(task_data.getAssigned_name())) {
                 firebaseFirestore.collection("users").document(task_data.getAssigned_id()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -279,17 +285,16 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         String temp_name = documentSnapshot.getString("name");
                         itemViewHolder.assigned_name.setText(temp_name);
-                        Map<String,Object> name_update = new HashMap<>();
-                        name_update.put("assigned_to_name",temp_name);
+                        Map<String, Object> name_update = new HashMap<>();
+                        name_update.put("assigned_to_name", temp_name);
                         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(name_update);
                     }
                 });
-            }
-            else {
+            } else {
                 itemViewHolder.assigned_name.setText(task_data.getAssigned_name());
             }
             itemViewHolder.admin_btn.setVisibility(View.VISIBLE);
-            if (status.equals("Waiting confirmation")){
+            if (status.equals("Waiting confirmation")) {
                 itemViewHolder.accept_reject.setVisibility(View.VISIBLE);
                 itemViewHolder.edit.setVisibility(View.GONE);
                 itemViewHolder.accept.setClickable(true);
@@ -307,13 +312,12 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
 //                itemViewHolder.admin_btn.setVisibility(View.GONE);
 //                itemViewHolder.status.setTextColor(Color.RED);
 //            }
-            if (status.equals("Completed")){
+            if (status.equals("Completed")) {
                 itemViewHolder.accept_reject.setVisibility(View.GONE);
                 itemViewHolder.admin_btn.setVisibility(View.GONE);
                 itemViewHolder.status.setTextColor(Color.GREEN);
                 itemViewHolder.delete_completed.setVisibility(View.VISIBLE);
-            }
-            else if (status.startsWith("Deleted by")||status.startsWith("Rejected by")){
+            } else if (status.startsWith("Deleted by") || status.startsWith("Rejected by")) {
                 itemViewHolder.delete_completed.setVisibility(View.VISIBLE);
                 itemViewHolder.admin_btn.setVisibility(View.GONE);
                 itemViewHolder.accept_reject.setVisibility(View.GONE);
@@ -322,7 +326,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             itemViewHolder.accept.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String Name = getshared.getString("name",null);
+                    String Name = getshared.getString("name", null);
                     itemViewHolder.accept.setClickable(false);
                     itemViewHolder.reject.setClickable(false);
                     itemViewHolder.delete.setClickable(false);
@@ -337,11 +341,10 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                 @Override
                 public void onClick(View view) {
                     String temp_entry = itemViewHolder.editText_work_description.getText().toString();
-                    if (TextUtils.isEmpty(temp_entry)){
+                    if (TextUtils.isEmpty(temp_entry)) {
                         itemViewHolder.editText_work_description.setError("Reason for rejection is required");
-                    }
-                    else {
-                        String Name = getshared.getString("name",null);
+                    } else {
+                        String Name = getshared.getString("name", null);
                         itemViewHolder.accept.setClickable(false);
                         itemViewHolder.reject.setClickable(false);
                         itemViewHolder.delete.setClickable(false);
@@ -376,10 +379,10 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                     AppCompatActivity activity = (AppCompatActivity) view.getContext();
                     Fragment fragment = new edit_task();
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable("task",task_data);
+                    bundle.putSerializable("task", task_data);
                     fragment.setArguments(bundle);
 
-                    activity.getSupportFragmentManager().beginTransaction().replace(holder_edit,fragment).addToBackStack(null).commit();
+                    activity.getSupportFragmentManager().beginTransaction().replace(holder_edit, fragment).addToBackStack(null).commit();
                 }
             });
             itemViewHolder.delete_completed.setOnClickListener(new View.OnClickListener() {
@@ -400,7 +403,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
 
     private void completed_delete(ModelClass_Task task_data) {
         Map<String, Object> status = new HashMap<>();
-        status.put("assigned_to","UbMTtUzDOSajMtqFRX3wYP1b3QD2");
+        status.put("assigned_to", "UbMTtUzDOSajMtqFRX3wYP1b3QD2");
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -412,14 +415,14 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(context, "Some problem occurred", Toast.LENGTH_SHORT).show();
-                Log.d("error",e.toString());
+                Log.d("error", e.toString());
             }
         });
     }
 
     private void completed_delete_admin(ModelClass_Task task_data) {
         Map<String, Object> status = new HashMap<>();
-        status.put("created_by_uid","fnXIlv2F81gp9Q98yYmgrnLU64N2");
+        status.put("created_by_uid", "fnXIlv2F81gp9Q98yYmgrnLU64N2");
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -431,63 +434,63 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(context, "Some problem occurred", Toast.LENGTH_SHORT).show();
-                Log.d("error",e.toString());
+                Log.d("error", e.toString());
             }
         });
     }
 
 
     private void notify_user(ModelClass_Task task_data) {
-        notificationHelper.sendNotificationTune2(task_data.getAssigned_id(),"Reminder for the task from: \n"+task_data.getCreated_name());
+        notificationHelper.sendNotificationTune2(task_data.getAssigned_id(), task_data.getTitle() + "\nReminder from: \n" + task_data.getCreated_name());
         Toast.makeText(context, "Notification sent", Toast.LENGTH_SHORT).show();
     }
 
     private void reject_admin(final ModelClass_Task task_data) {
         final String name = getshared.getString("name", null);
         Map<String, Object> status = new HashMap<>();
-        status.put("status","Rejected work by: "+name);
+        status.put("status", "Rejected work by: " + name);
         status.put("timestamp_1", Timestamp.now());
-        status.put("description_work",task_data.getDescription_work());
+        status.put("description_work", task_data.getDescription_work());
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(context, "Task marked as rejected", Toast.LENGTH_SHORT).show();
 //                        getUpdateData_complete();
-                        notificationHelper.sendNotificationTune2(task_data.getAssigned_id(),"Work Rejected by \n"+name);
+                        notificationHelper.sendNotificationTune2(task_data.getAssigned_id(), task_data.getTitle() + "\nWork Rejected by \n" + name);
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(context, "Some problem Occurred", Toast.LENGTH_SHORT).show();
 
-                    }
-                });
+            }
+        });
     }
 
     private void getUpdateData() {
         Task_Adapter_dataSetter task_modelClass;
-        task_modelClass = new Task_Adapter_dataSetter(object.getContext(),object.getRecyclerView(), object.getActivity(), object.getLoading(), object.getHolder_edit(), object.getFilter());
+        task_modelClass = new Task_Adapter_dataSetter(object.getContext(), object.getRecyclerView(), object.getActivity(), object.getLoading(), object.getHolder_edit(), object.getFilter());
         task_modelClass.getdata();
     }
 
-    private void getUpdateData_complete(){
+    private void getUpdateData_complete() {
         Completed_report_dataSetter dataSetter;
-        dataSetter = new Completed_report_dataSetter(object.getContext(),object.getRecyclerView(),object.getActivity(),object.getLoading(),object.getHolder_edit(),object.getFilter());
+        dataSetter = new Completed_report_dataSetter(object.getContext(), object.getRecyclerView(), object.getActivity(), object.getLoading(), object.getHolder_edit(), object.getFilter());
         dataSetter.getdata();
     }
 
     private void deleteTask(final ModelClass_Task task_data) {
         final String name = getshared.getString("name", null);
-        Map<String,Object> status = new HashMap<>();
-        status.put("status","Deleted by: "+name);
+        Map<String, Object> status = new HashMap<>();
+        status.put("status", "Deleted by: " + name);
         status.put("timestamp_1", Timestamp.now());
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(context, "Task Marked as Deleted", Toast.LENGTH_SHORT).show();
                 getUpdateData();
-                notificationHelper.sendNotificationTune2(task_data.getAssigned_id(),"Task Deleted by \n"+name);
+                notificationHelper.sendNotificationTune2(task_data.getAssigned_id(), task_data.getTitle() + "\nDeleted by \n" + name);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -498,19 +501,19 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
     }
 
     private void markcompleteAdmin(final ModelClass_Task task_data) {
-        Map<String,Object> status = new HashMap<>();
-        status.put("status","Completed");
+        Map<String, Object> status = new HashMap<>();
+        status.put("status", "Completed");
         status.put("timestamp_1", Timestamp.now());
-        status.put("description_work",task_data.getDescription_work());
+        status.put("description_work", task_data.getDescription_work());
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status)
-        .addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Toast.makeText(context, "Task marked as Completed", Toast.LENGTH_SHORT).show();
-                getUpdateData();
-                notificationHelper.sendNotificationTune2(task_data.getAssigned_id(),"Work Accepted by \n"+task_data.getCreated_name());
-            }
-        }).addOnFailureListener(new OnFailureListener() {
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(context, "Task marked as Completed", Toast.LENGTH_SHORT).show();
+                        getUpdateData();
+                        notificationHelper.sendNotificationTune2(task_data.getAssigned_id(), task_data.getTitle() + "\nAccepted by \n" + task_data.getCreated_name());
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(context, "Some problem occurred", Toast.LENGTH_SHORT).show();
@@ -528,7 +531,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             public void onSuccess(Void aVoid) {
                 Toast.makeText(context, "Task marked as rejected", Toast.LENGTH_SHORT).show();
                 getUpdateData();
-                notificationHelper.sendNotificationTune2(task_data.getCreated_id(),"Task Rejected by \n"+name);
+                notificationHelper.sendNotificationTune2(task_data.getCreated_id(), task_data.getTitle() + "\nRejected by \n" + name);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -542,13 +545,13 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
         Map<String, Object> status = new HashMap<>();
         status.put("status", "Waiting confirmation");
         status.put("timestamp_1", Timestamp.now());
-        status.put("description_work",task_data.getDescription_work());
+        status.put("description_work", task_data.getDescription_work());
         firebaseFirestore.collection("tasks").document(task_data.getTaskId()).update(status).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(context, "Task Marked as completed", Toast.LENGTH_SHORT).show();
                 getUpdateData();
-                notificationHelper.sendNotificationTune2(task_data.getCreated_id(),"Work completed by: \n" + task_data.getAssigned_name());
+                notificationHelper.sendNotificationTune2(task_data.getCreated_id(), task_data.getTitle() + "\nCompleted by: \n" + task_data.getAssigned_name());
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -566,7 +569,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             public void onSuccess(Void aVoid) {
                 Toast.makeText(context, "Task Marked as accepted", Toast.LENGTH_SHORT).show();
                 getUpdateData();
-                notificationHelper.sendNotificationTune2(task_data.getCreated_id(),"Task accepted by: \n" + task_data.getAssigned_name());
+                notificationHelper.sendNotificationTune2(task_data.getCreated_id(), task_data.getTitle() + "\nTask accepted by: \n" + task_data.getAssigned_name());
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -585,12 +588,13 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
     }
 
     public class viewHolder extends RecyclerView.ViewHolder {
-        TextView title, description, date, priority, name_creator, status,assigned_name,work_description,Image_btn, create_date;
+        TextView title, description, date, priority, name_creator, status, assigned_name, work_description, Image_btn, create_date;
         Button Complete, reject, accept;
-        ImageButton edit,delete,notify,delete_completed;
+        ImageButton edit, delete, notify, delete_completed;
         EditText editText_work_description;
-        LinearLayout accept_reject,task_by,task_to,admin_btn;
+        LinearLayout accept_reject, task_by, task_to, admin_btn;
         ImageView image;
+        Boolean image_open = false;
 
         public viewHolder(@NonNull View itemView) {
             super(itemView);
@@ -613,7 +617,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
             notify = itemView.findViewById(R.id.notify_button);
             editText_work_description = itemView.findViewById(R.id.editText_work);
             work_description = itemView.findViewById(R.id.work_history);
-//            image = itemView.findViewById(R.id.image);
+            image = itemView.findViewById(R.id.image);
             Image_btn = itemView.findViewById(R.id.image_btn);
             delete_completed = itemView.findViewById(R.id.delete_button_completed);
             create_date = itemView.findViewById(R.id.create_date);

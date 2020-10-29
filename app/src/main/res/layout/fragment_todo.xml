@@ -1,15 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center"
-    tools:context=".ui.todo.Todo">
+    android:orientation="vertical"
+    tools:context=".ui.todo.Todo"
+    android:background="#e9e9e9">
 
-    <TextView
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:elevation="10dp"
+            android:id="@id/main_task" />
+
+        <TextView
+            android:id="@+id/loading_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:textSize="20sp"
+            android:text="Loading..." />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:orientation="horizontal"
+                android:background="@drawable/rounded_default_color"
+                android:layout_marginStart="20sp"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginEnd="20dp">
+
+                <Button
+                    android:id="@+id/all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="20dp"
+                    android:background="@drawable/white_box_round20"
+                    android:textColor="@color/colorPrimary"
+                    android:text="All" />
+
+                <Button
+                    android:id="@+id/pending"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="20dp"
+                    android:textColor="#fff"
+                    android:background="@drawable/rounded_default_color"
+                    android:text="Pending" />
+
+
+                <Button
+                    android:id="@+id/complete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textColor="#fff"
+                    android:background="@drawable/rounded_default_color"
+                    android:text="Complete" />
+            </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/task_list"
+            android:visibility="gone" />
+        </LinearLayout>
+    </RelativeLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_task"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/coming_soon"
-        android:textSize="25dp"/>
+        app:srcCompat="@drawable/ic_add"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/fab_margin" />
 
-</LinearLayout>
+</RelativeLayout>
