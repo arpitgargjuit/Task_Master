@@ -37,6 +37,8 @@ import com.cbitts.taskmanager.MainActivity;
 import com.cbitts.taskmanager.NotificationHelper;
 import com.cbitts.taskmanager.R;
 import com.cbitts.taskmanager.ui.Report.Completed_report_dataSetter;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
@@ -53,6 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import uk.co.senab.photoview.PhotoViewAttacher;
+
 public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     Context context;
@@ -65,6 +69,7 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
     final String TAG = "recyclerView_adapter";
     CustomObject object;
     NotificationHelper notificationHelper = new NotificationHelper();
+    private InterstitialAd mInterstitialAd;
 
     public recyclerView_adapter_tasks(Context context, List<ModelClass_Task> task_list, int holder_edit, CustomObject object) {
         this.context = context;
@@ -79,6 +84,9 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_task_item, parent, false);
+        mInterstitialAd = new InterstitialAd(context);
+        mInterstitialAd.setAdUnitId("ca-app-pub-6440522252929649/1783501172");//TODO: interestitial add key
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
         return new viewHolder(itemView);
     }
 
@@ -134,6 +142,10 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
                                 .load(task_data.getImage())
                                 .into(itemViewHolder.image);
                         itemViewHolder.image_open = true;
+
+                        PhotoViewAttacher pAttacher;
+                        pAttacher = new PhotoViewAttacher(itemViewHolder.image);
+                        pAttacher.update();
                     }
 
 //
@@ -443,6 +455,11 @@ public class recyclerView_adapter_tasks extends RecyclerView.Adapter<RecyclerVie
     private void notify_user(ModelClass_Task task_data) {
         notificationHelper.sendNotificationTune2(task_data.getAssigned_id(), task_data.getTitle() + "\nReminder from: \n" + task_data.getCreated_name());
         Toast.makeText(context, "Notification sent", Toast.LENGTH_SHORT).show();
+        if (mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        } else {
+            Log.d("TAG", "The interstitial wasn't loaded yet.");
+        }
     }
 
     private void reject_admin(final ModelClass_Task task_data) {

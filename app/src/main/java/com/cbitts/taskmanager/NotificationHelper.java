@@ -75,7 +75,7 @@ public class NotificationHelper {
                         con.setDoInput(true);
 
                         con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                        con.setRequestProperty("Authorization", "Basic NGIwMDZmNjEtMDJjMC00ODM2LTgzMTEtODI4Zjg2NDIwNGNj");
+                        con.setRequestProperty("Authorization", "Basic MTVkZDk3OTUtYmMzYS00Y2IyLTk0OTctYzUwMzIwNWJlYWYz");
                         con.setRequestMethod("POST");
 
                         String strJsonBody = "{"
@@ -127,7 +127,7 @@ public class NotificationHelper {
                         noti.put("date",sdf.format(cal.getTime())+" at "+currentTime);
                         noti.put("timestamp_1", Timestamp.now());
 
-                        firebaseFirestore.collection("notifications").document(randGenerate.randgenerate()).set(noti).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        firebaseFirestore.collection("users").document(uid).collection("notifications").document(randGenerate.randgenerate()).set(noti).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 Log.d("notification","Uploaded to database");

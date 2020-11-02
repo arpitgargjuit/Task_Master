@@ -1,6 +1,8 @@
 package com.cbitts.taskmanager.ui.Logout;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,12 +19,14 @@ import com.cbitts.taskmanager.MobileEnter;
 import com.cbitts.taskmanager.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.onesignal.OneSignal;
-
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 public class Logout extends Fragment {
 
     Button logout,cancel;
     FirebaseAuth firebaseAuth;
+    private AdView mAdView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,10 +54,18 @@ public class Logout extends Fragment {
                 OneSignal.sendTag("id","");
             }
         });
+
+        mAdView = view.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
     }
 
     private void logout() {
         firebaseAuth.signOut();
+        SharedPreferences getshared;
+        getshared = this.getActivity().getSharedPreferences("user_details", Context.MODE_PRIVATE);
+        getshared.edit().clear().apply();
                 startActivity(new Intent(getContext(), MobileEnter.class));
     }
 

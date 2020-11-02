@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -24,19 +25,28 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.cbitts.taskmanager.MainActivity;
 import com.cbitts.taskmanager.NotificationHelper;
 import com.cbitts.taskmanager.R;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -48,9 +58,13 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 
+import static android.app.Activity.RESULT_OK;
 
-public class edit_task extends Fragment implements AdapterView.OnItemSelectedListener,DatePickerDialog.OnDateSetListener {
 
+public class edit_task extends Fragment implements AdapterView.OnItemSelectedListener,DatePickerDialog.OnDateSetListener, Custondialog_userSelect.OnInputSelected {
+
+    private static final int PICK_IMAGE_REQUEST = 1;
+    private final String TAG = "edit_task";
     EditText title,description;
     Spinner spinner;
     Button add,select_date, select_user;
@@ -63,6 +77,11 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
     final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
     String Date;
     ModelClass_Task task;
+
+    ImageView image;
+    StorageReference storageReference;
+    int flag = 0;
+    Uri imageuri1;
 
      @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,36 +96,69 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
 
         Bundle bundle = getArguments();
         task = (ModelClass_Task) bundle.getSerializable("task");
+        try {
+            addTaskGenerator.setName(task.getAssigned_name());
+            addTaskGenerator.setUid(task.getAssigned_id());
+        } catch (Exception e) {
+            Log.d(TAG, e.getMessage());
+            Toast.makeText(getContext(), "Some problem occurred", Toast.LENGTH_SHORT).show();
+        }
         Toast.makeText(getContext(), task.getTitle(), Toast.LENGTH_SHORT).show();
 
-        spinner = view.findViewById(R.id.priority_select);
-        add = view.findViewById(R.id.add);
-        title = view.findViewById(R.id.task_tittle);
-        description = view.findViewById(R.id.task_description);
-        recyclerView = view.findViewById(R.id.person_list);
-        select_date = view.findViewById(R.id.select_date);
+        bindViews(view);
+
+
         spinner.setOnItemSelectedListener(this);
-        select_user = view.findViewById(R.id.select_user);
+
 
         title.setText(task.getTitle());
 //        if(!TextUtils.isEmpty(task.getDate())){
         select_date.setText(task.getDate());
+        Date = task.getDate();
 //        if(!TextUtils.isEmpty(task.getDescription()))
         description.setText(task.getDescription());
+        if (addTaskGenerator.getUid().equals(addTaskGenerator.getName())) {
+            firebaseFirestore.collection("users").document(addTaskGenerator.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    String temp_name = documentSnapshot.getString("name");
+                    select_user.setText(temp_name);
+                    Map<String, Object> name_update = new HashMap<>();
+                    name_update.put("assigned_to_name", temp_name);
+                    firebaseFirestore.collection("tasks").document(task.getTaskId()).update(name_update);
+                }
+            });
+        }
+        else {
+            select_user.setText(addTaskGenerator.getName());
+        }
+
+//        try {
+//            if (task.getFlag().equals("1")) {
+//                Glide.with(getContext())
+//                        .asBitmap()
+//                        .load(task.getImage())
+//                        .into(image);
+//            }
+//        }
+//        catch (Exception e){
+//            Log.d(TAG,e.getMessage());
+//        }
+
 //        description.setHint("No Description");
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),R.array.priority_select,android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.priority_select, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         int spinnerPosition = spinner.getSelectedItemPosition();
         spinner.post(new Runnable() {
             @Override
-        public void run() {
-                if(task.getPriority().equals("High")) {
+            public void run() {
+                if (task.getPriority().equals("High")) {
                     spinner.setSelection(1);
                 }
-        }
-    });
+            }
+        });
 
         select_user.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,30 +174,99 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
             }
         });
 
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    openFileChooser();
+                } catch (Exception e) {
+                    Log.d(TAG, e.getMessage());
+                }
+            }
+        });
+
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 String Title = title.getText().toString();
                 String Description = description.getText().toString();
-                if (TextUtils.isEmpty(Title)){
+                if (TextUtils.isEmpty(Title)) {
                     title.setError("Enter Title of the task");
-                }
-                else if (TextUtils.isEmpty(addTaskGenerator.getUid())){
+                } else if (TextUtils.isEmpty(addTaskGenerator.getUid())) {
                     Toast.makeText(getContext(), "Select the user", Toast.LENGTH_SHORT).show();
-                }
-                else if (TextUtils.isEmpty(Description)){
+                } else if (TextUtils.isEmpty(Description)) {
                     description.setError("Description is required");
-                }
-                else if (TextUtils.isEmpty(Date)){
+                } else if (TextUtils.isEmpty(Date)) {
                     Toast.makeText(getContext(), "Please Select Due date", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    upload(Title,Description,Date,Priority,addTaskGenerator.getUid());
+                } else {
+                    upload(Title, Description, Date, Priority, addTaskGenerator.getUid());
                 }
             }
         });
+
+
     }
+
+    private void openFileChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+        Log.d(TAG,"opened successfully");
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            imageuri1 = data.getData();
+            Picasso.get().load(imageuri1)
+                    .fit()
+                    .centerCrop()
+                    .into(image);
+            flag = 1;
+        }
+    }
+
+    private void uploadpicture(String task_id) {
+
+        final StorageReference riversRef = storageReference.child("document/*" + task_id);
+
+        riversRef.putFile(imageuri1)
+                .continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
+                        }
+                        // Continue with the task to get the download URL
+                        return riversRef.getDownloadUrl();
+                    }
+                })
+                .addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            Uri downloadUri = task.getResult();
+                            Log.d("image", downloadUri+ "");
+                        } else {
+                            // Handle failures
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        try {
+                            Toast.makeText(getContext(), "Some Problem occurred in uploading image", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+    }
+
     private void showDatePicker() {
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 getContext(),
@@ -177,12 +298,14 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
         task.put("priority", priority);
         task.put("created_by_uid", getshared.getString("uid", fAuth.getCurrentUser().getUid()));
         task.put("created_by_name", getshared.getString("name", "Not Available"));
-        task.put("status", "Waiting acceptance");
+//        task.put("status", "Waiting acceptance");
         task.put("task_id", TaskID);
 
         edittask(task, TaskID);
     }
-    private void edittask(final Map<String, Object> task, String taskid) {
+
+
+    private void edittask(final Map<String, Object> task, final String taskid) {
         DocumentReference documentReference = firebaseFirestore.collection("tasks").document(taskid);
         documentReference.update(task).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -192,6 +315,11 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
                 getActivity().finish();
                 NotificationHelper notificationHelper = new NotificationHelper();
                 notificationHelper.sendNotificationTune2(task.get("assigned_to").toString(),task.get("title") + "\nEdited by: \n"+task.get("created_by_name"));
+
+                if (flag != 0) {
+                    uploadpicture(taskid);
+                }
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -334,5 +462,23 @@ public class edit_task extends Fragment implements AdapterView.OnItemSelectedLis
         Date = i2+"/"+(i1+1)+"/"+i;
         select_date.setText(Date);
         Log.d("Date is ",Date);
+    }
+
+    @Override
+    public void sendInput(Add_task_generator add_task_generator) {
+        Log.d(TAG, "Found incoming input");
+        this.addTaskGenerator = add_task_generator;
+        select_user.setText(addTaskGenerator.getName());
+    }
+
+    private void bindViews(View view) {
+        spinner = view.findViewById(R.id.priority_select);
+        add = view.findViewById(R.id.add);
+        title = view.findViewById(R.id.task_tittle);
+        description = view.findViewById(R.id.task_description);
+        recyclerView = view.findViewById(R.id.person_list);
+        select_date = view.findViewById(R.id.select_date);
+        select_user = view.findViewById(R.id.select_user);
+        image = view.findViewById(R.id.image);
     }
 }

@@ -133,7 +133,12 @@ public class Custondialog_userSelect extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getdata();
+        try {
+            getdata();
+        }
+        catch (Exception e){
+            Log.d("Exception_userSelect",e.toString());
+        }
     }
 
     private void getdata() {

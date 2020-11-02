@@ -145,6 +145,9 @@
                 android:drawablePadding="10dp"
                 android:textColor="#fff"
                 android:text="Add task" />
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"/>
         </LinearLayout>
     </RelativeLayout>
 

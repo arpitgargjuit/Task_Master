@@ -39,5 +39,14 @@
         <item>High</item>
     </string-array>
 
+<!--    adds-->
+    <string name="banner_ad_unit_id">ca-app-pub-6440522252929649/5013968044</string>
+    <string name="interestitial_ad_unit_id">ca-app-pub-6440522252929649/1783501172</string>
+
+    <string name="internet_error">Internet connection is not available\nor Unstable</string>
+    <string name="internet_error_toast">Internet is not available</string>
+
+<!--    //Home Name No internet-->
+    <string name="internet_error_name">No Internet</string>
 
 </resources>

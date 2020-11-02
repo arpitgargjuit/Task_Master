@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cbitts.taskmanager.R;
 import com.cbitts.taskmanager.ui.Task.CustomObject;
 import com.cbitts.taskmanager.ui.Task.ModelClass_Task;
 import com.cbitts.taskmanager.ui.Task.recyclerView_adapter_tasks;
@@ -26,8 +27,16 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class Waiting_report_dataSetter {
     RecyclerView recyclerView;
@@ -62,6 +71,12 @@ public class Waiting_report_dataSetter {
     }
 
     private void getdata1() {
+
+        if (!internetConnectionAvailable(10000)){
+            Toast.makeText(context, R.string.internet_error_toast, Toast.LENGTH_SHORT).show();
+            loading.setText(R.string.internet_error);
+        }
+
         if (uid.equals("null")){
             uid = firebaseAuth.getCurrentUser().getUid();
             getdata1();
@@ -156,6 +171,28 @@ public class Waiting_report_dataSetter {
                 loading.setText("Unable to Load");
             }
         });
+    }
+
+    private boolean internetConnectionAvailable(int timeOut) {
+        InetAddress inetAddress = null;
+        try {
+            Future<InetAddress> future = Executors.newSingleThreadExecutor().submit(new Callable<InetAddress>() {
+                @Override
+                public InetAddress call() {
+                    try {
+                        return InetAddress.getByName("google.com");
+                    } catch (UnknownHostException e) {
+                        return null;
+                    }
+                }
+            });
+            inetAddress = future.get(timeOut, TimeUnit.MILLISECONDS);
+            future.cancel(true);
+        } catch (InterruptedException e) {
+        } catch (ExecutionException e) {
+        } catch (TimeoutException e) {
+        }
+        return inetAddress!=null && !inetAddress.equals("");
     }
 
     private void getcreatedtask(){

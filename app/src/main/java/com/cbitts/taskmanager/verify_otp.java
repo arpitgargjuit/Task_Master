@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.cbitts.taskmanager.ui.todo.Todo;
 import com.chaos.view.PinView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -35,9 +36,16 @@ import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.onesignal.OneSignal;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class verify_otp extends AppCompatActivity {
 
@@ -77,10 +85,18 @@ public class verify_otp extends AppCompatActivity {
                     editTextCode.requestFocus();
                     return;
                 }
-                Log.d("Code",code);
-                Log.d(TAG,"test "+mVerificationId);
+
+                if (internetConnectionAvailable(10000)) {
+
+                    Log.d("Code", code);
+                    Log.d(TAG, "test " + mVerificationId);
 //                editTextCode.setError("Verified");
-                verifyVerificationCode(code);
+                    verifyVerificationCode(code);
+                    Toast.makeText(verify_otp.this, "Verifying...", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(verify_otp.this, R.string.internet_error_toast, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -112,12 +128,14 @@ public class verify_otp extends AppCompatActivity {
                 //verifying the code
                 verifyVerificationCode(code);
             }
+            else
             signInWithPhoneAuthCredential(phoneAuthCredential);
         }
 
         @Override
         public void onVerificationFailed(FirebaseException e) {
             Toast.makeText(verify_otp.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            Log.d("otp_problem_check",e.getMessage());
         }
 
         @Override
@@ -147,6 +165,8 @@ public class verify_otp extends AppCompatActivity {
                 .addOnCompleteListener(verify_otp.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (!task.isSuccessful())
+                        Log.d("otp_check",task.getException().toString());
                         if (task.isSuccessful()) {
                             //verification successful we will start the profile activity
                             final String uid = mAuth.getCurrentUser().getUid();
@@ -241,17 +261,39 @@ public class verify_otp extends AppCompatActivity {
                                 message = "Invalid code entered...";
                             }
 
-                            Snackbar snackbar = Snackbar.make(findViewById(R.id.parent), message, Snackbar.LENGTH_LONG);
+                            final Snackbar snackbar = Snackbar.make(findViewById(R.id.parent), message, Snackbar.LENGTH_LONG);
                             snackbar.setAction("Dismiss", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-
+                                    snackbar.dismiss();
                                 }
                             });
-//                            snackbar.show();
+                            snackbar.show();
                         }
                     }
                 });
+    }
+
+    private boolean internetConnectionAvailable(int timeOut) {
+        InetAddress inetAddress = null;
+        try {
+            Future<InetAddress> future = Executors.newSingleThreadExecutor().submit(new Callable<InetAddress>() {
+                @Override
+                public InetAddress call() {
+                    try {
+                        return InetAddress.getByName("google.com");
+                    } catch (UnknownHostException e) {
+                        return null;
+                    }
+                }
+            });
+            inetAddress = future.get(timeOut, TimeUnit.MILLISECONDS);
+            future.cancel(true);
+        } catch (InterruptedException e) {
+        } catch (ExecutionException e) {
+        } catch (TimeoutException e) {
+        }
+        return inetAddress!=null && !inetAddress.equals("");
     }
 
 

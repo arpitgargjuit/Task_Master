@@ -30,6 +30,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,6 +40,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class TodoAdapter_dataSetter {
 
@@ -70,12 +78,40 @@ public class TodoAdapter_dataSetter {
             uid = getshared.getString("uid", "null");
             name = getshared.getString("name", "null");
             task_list.clear();
+
+            if (!internetConnectionAvailable(10000)){
+                loading.setText(R.string.internet_error);
+                Toast.makeText(context, R.string.internet_error_toast, Toast.LENGTH_SHORT).show();
+            }
+
             if (filter == 1 || filter == 2){
             getdata1();}
             if (filter == 1 || filter == 3 ){
             getdata2();}
         }
 
+
+    private boolean internetConnectionAvailable(int timeOut) {
+        InetAddress inetAddress = null;
+        try {
+            Future<InetAddress> future = Executors.newSingleThreadExecutor().submit(new Callable<InetAddress>() {
+                @Override
+                public InetAddress call() {
+                    try {
+                        return InetAddress.getByName("google.com");
+                    } catch (UnknownHostException e) {
+                        return null;
+                    }
+                }
+            });
+            inetAddress = future.get(timeOut, TimeUnit.MILLISECONDS);
+            future.cancel(true);
+        } catch (InterruptedException e) {
+        } catch (ExecutionException e) {
+        } catch (TimeoutException e) {
+        }
+        return inetAddress!=null && !inetAddress.equals("");
+    }
 
         private void getdata1() {
             firebaseFirestore.collection("users").document(uid).collection("self_task").orderBy("Date_due").orderBy("timestamp_created").get()

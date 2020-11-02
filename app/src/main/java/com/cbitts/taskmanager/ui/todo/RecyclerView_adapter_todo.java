@@ -135,7 +135,7 @@ public class RecyclerView_adapter_todo extends RecyclerView.Adapter<RecyclerView
                 itemViewHolder.editText_work_description.setCursorVisible(true);
                 itemViewHolder.Complete.setVisibility(View.VISIBLE);
                 itemViewHolder.editText_work_description.setVisibility(View.VISIBLE);
-                itemViewHolder.delete_completed.setVisibility(View.VISIBLE);
+//                itemViewHolder.delete_completed.setVisibility(View.VISIBLE);
             } else if (status.equals("Completed")) {
                 itemViewHolder.status.setTextColor(Color.GREEN);
             }

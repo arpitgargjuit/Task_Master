@@ -37,6 +37,8 @@ import android.widget.Toast;
 import com.cbitts.taskmanager.MainActivity;
 import com.cbitts.taskmanager.NotificationHelper;
 import com.cbitts.taskmanager.R;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -68,6 +70,8 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 
+import uk.co.senab.photoview.PhotoViewAttacher;
+
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
@@ -94,6 +98,7 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
     NotificationHelper notificationHelper;
     int permissionCheck;
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    private InterstitialAd mInterstitialAd;
 
 
     @Override
@@ -114,6 +119,10 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
         notificationHelper = new NotificationHelper(getContext());
         storageReference = FirebaseStorage.getInstance().getReference();
         permissionCheck = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_CONTACTS);
+
+        mInterstitialAd = new InterstitialAd(getContext());
+        mInterstitialAd.setAdUnitId("ca-app-pub-6440522252929649/1783501172");//TODO: interestitial add key
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(), R.array.priority_select, android.R.layout.simple_spinner_item);
@@ -236,6 +245,11 @@ public class add_task extends Fragment implements AdapterView.OnItemSelectedList
                 Toast.makeText(getContext(), "Task Created Successfully", Toast.LENGTH_SHORT).show();
                 notificationHelper.sendNotificationTune1(task.get("assigned_to").toString(), "New Task Added: \n" + task.get("title").toString() + " by " + task.get("created_by_name"));
                 startActivity(new Intent(getContext(), MainActivity.class));
+                if (mInterstitialAd.isLoaded()) {
+                    mInterstitialAd.show();
+                } else {
+                    Log.d("TAG", "The interstitial wasn't loaded yet.");
+                }
                 if (flag != 0)
                     uploadpicture(taskid);
                 getActivity().finish();

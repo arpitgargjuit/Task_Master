@@ -20,6 +20,8 @@ import com.cbitts.taskmanager.R;
 import com.cbitts.taskmanager.ui.Task.GalleryViewModel;
 import com.cbitts.taskmanager.ui.Task.Task_Adapter_dataSetter;
 import com.cbitts.taskmanager.ui.Task.add_task;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
@@ -29,6 +31,7 @@ public class Todo extends Fragment {
     TextView loading;
     FloatingActionButton add_task;
     Button all,pending,complete;
+    private AdView mAdView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -42,6 +45,10 @@ public class Todo extends Fragment {
         all = root.findViewById(R.id.all);
         pending = root.findViewById(R.id.pending);
         complete = root.findViewById(R.id.complete);
+
+        mAdView = root.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         add_task.setOnClickListener(new View.OnClickListener() {
             @Override

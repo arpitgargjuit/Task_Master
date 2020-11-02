@@ -59,12 +59,22 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.onesignal.OneSignal;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static com.cbitts.taskmanager.R.*;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 public class HomeFragment extends Fragment {
 
@@ -84,6 +94,7 @@ public class HomeFragment extends Fragment {
     int filter = 0;
     Long pend= 0L,wait= 0L,over= 0L,compl= 0L;
     LinearLayout pending_view, completed_view, overdue_view, waiting_view, about_view, todo_view;
+    private AdView mAdView;
 
     private HomeViewModel homeViewModel;
 
@@ -117,6 +128,10 @@ public class HomeFragment extends Fragment {
         about_view = root.findViewById(id.aboutApp_view);
         todo_view = root.findViewById(R.id.todo_view);
         swipeRefreshLayout = root.findViewById(id.refresh);
+
+        mAdView = root.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -267,6 +282,11 @@ public class HomeFragment extends Fragment {
 
 //        OneSignal.sendTag("id",uid);
         getvalues();
+
+        if (!internetConnectionAvailable(10000)){
+            name.setText(string.internet_error_name);
+        }
+
         if(firebaseAuth.getCurrentUser()!=null) {
             String uid = firebaseAuth.getCurrentUser().getUid();
             DocumentReference documentReference = firebaseFirestore.collection("tasks").document(uid);
@@ -290,6 +310,14 @@ public class HomeFragment extends Fragment {
     }
 
     private void getvalues() {
+
+        if (!internetConnectionAvailable(10000)){
+            Toast.makeText(getContext(), string.internet_error_toast, Toast.LENGTH_SHORT).show();
+            pending.setText("-");
+            completed.setText("-");
+            overdue.setText("-");
+            waiting.setText("-");
+        }
         if (TextUtils.isEmpty(uid)) {
             uid = firebaseAuth.getCurrentUser().getUid();
             getvalues();
@@ -545,6 +573,28 @@ public class HomeFragment extends Fragment {
         anyChartView.setChart(pie);
         anyChartView.clear();
         anyChartView.setChart(pie);
+    }
+
+    private boolean internetConnectionAvailable(int timeOut) {
+        InetAddress inetAddress = null;
+        try {
+            Future<InetAddress> future = Executors.newSingleThreadExecutor().submit(new Callable<InetAddress>() {
+                @Override
+                public InetAddress call() {
+                    try {
+                        return InetAddress.getByName("google.com");
+                    } catch (UnknownHostException e) {
+                        return null;
+                    }
+                }
+            });
+            inetAddress = future.get(timeOut, TimeUnit.MILLISECONDS);
+            future.cancel(true);
+        } catch (InterruptedException e) {
+        } catch (ExecutionException e) {
+        } catch (TimeoutException e) {
+        }
+        return inetAddress!=null && !inetAddress.equals("");
     }
 
     private void setValue(Long pending, Long waiting, Long overdue, Long completed,String name) {

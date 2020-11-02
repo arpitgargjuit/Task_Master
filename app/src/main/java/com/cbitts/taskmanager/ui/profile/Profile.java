@@ -20,6 +20,8 @@ import android.widget.EditText;
 import com.cbitts.taskmanager.Details_enter;
 import com.cbitts.taskmanager.MainActivity;
 import com.cbitts.taskmanager.R;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -42,6 +44,7 @@ public class Profile extends Fragment {
     FirebaseFirestore firebaseFirestore;
     FirebaseAuth firebaseAuth;
     SharedPreferences getshared;
+    private AdView mAdView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -70,6 +73,10 @@ public class Profile extends Fragment {
         getshared = getContext().getSharedPreferences("user_details", Context.MODE_PRIVATE);
         String Name = getshared.getString("name","Not available");
         name.setText(Name);
+
+        mAdView = view.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
     }
 

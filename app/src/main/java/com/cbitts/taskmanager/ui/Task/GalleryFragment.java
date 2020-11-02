@@ -25,6 +25,9 @@ import com.cbitts.taskmanager.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.AdRequest;
+
 
 public class GalleryFragment extends Fragment {
 
@@ -34,6 +37,7 @@ public class GalleryFragment extends Fragment {
     TextView loading;
     Button all,sent,received;
     int filter=Filter.getFilter();
+    private AdView mAdView;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -50,6 +54,10 @@ public class GalleryFragment extends Fragment {
         sent = root.findViewById(R.id.sent);
         received = root.findViewById(R.id.received);
         swipeRefreshLayout = root.findViewById(R.id.refresh);
+
+        mAdView = root.findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
