@@ -75,7 +75,7 @@ public class NotificationHelper {
                         con.setDoInput(true);
 
                         con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                        con.setRequestProperty("Authorization", "Basic MTVkZDk3OTUtYmMzYS00Y2IyLTk0OTctYzUwMzIwNWJlYWYz");
+                        con.setRequestProperty("Authorization", "Basic ");
                         con.setRequestMethod("POST");
 
                         String strJsonBody = "{"
